@@ -1,0 +1,79 @@
+/* ==========================================================================
+   StudyFlow — Tasks
+   ========================================================================== */
+
+.tasks-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.tasks-filters {
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.tasks-filters .search-box { max-width: 300px; }
+.tasks-filters .select-wrap select { min-width: 170px; }
+
+/* Task title cell */
+.task-title-cell { min-width: 220px; }
+.task-title-cell .t-title {
+  font-weight: 650;
+  color: var(--text-primary);
+  font-size: 13.5px;
+}
+.task-title-cell .t-desc {
+  color: var(--text-muted);
+  font-size: 12px;
+  margin-top: 2px;
+  max-width: 320px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.task-title-cell .t-desc:empty { display: none; }
+
+.task-row.done .t-title { text-decoration: line-through; color: var(--text-muted); }
+
+/* Complete checkbox */
+.task-check {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--success);
+  cursor: pointer;
+}
+
+/* Subject tag */
+.subject-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 8px;
+  color: var(--text-secondary);
+  background: var(--bg-hover);
+  white-space: nowrap;
+}
+
+/* Row actions */
+.row-actions { display: flex; align-items: center; gap: 4px; }
+
+.overdue-mark { color: var(--danger); font-weight: 700; font-size: 11px; }
+
+@media (max-width: 860px) {
+  .tasks-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+  .table-wrap { overflow-x: auto; }
+  .tasks-table { min-width: 760px; }
+
+  .tasks-filters .search-box { max-width: none; width: 100%; }
+  .tasks-filters .row-wrap { width: 100%; }
+}
+
+@media (max-width: 480px) {
+  .tasks-stats { grid-template-columns: 1fr 1fr; gap: 12px; }
+}

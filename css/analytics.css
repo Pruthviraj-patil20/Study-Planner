@@ -1,0 +1,36 @@
+/* ==========================================================================
+   StudyFlow — Analytics
+   ========================================================================== */
+
+#analytics-stats { margin-bottom: 22px; }
+
+.analytics-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.chart-card { min-width: 0; }
+
+.chart-body {
+  position: relative;
+  height: 280px;
+  padding: 18px 20px 20px;
+}
+
+.chart-body canvas { max-height: 260px; }
+
+.chart-empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+@media (max-width: 960px) {
+  .analytics-grid { grid-template-columns: 1fr; }
+  .chart-body { height: 260px; }
+}

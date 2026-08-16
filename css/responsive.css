@@ -1,0 +1,77 @@
+/* ==========================================================================
+   StudyFlow — Responsive Layouts
+   ========================================================================== */
+
+@media (max-width: 1100px) {
+  .grid-cols-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .grid-cols-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 900px) {
+  .sidebar {
+    transform: translateX(-100%);
+    box-shadow: var(--shadow-lg);
+  }
+  .sidebar.open { transform: translateX(0); }
+
+  .sidebar-close { display: inline-flex; }
+
+  .sidebar-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 13, 22, 0.5);
+    z-index: 35;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+  }
+  .sidebar-backdrop.show { opacity: 1; pointer-events: auto; }
+
+  .main { margin-left: 0; }
+
+  .menu-toggle { display: inline-flex; }
+
+  .content { padding: 20px 18px 40px; }
+  .topbar { padding: 0 18px; }
+}
+
+@media (max-width: 720px) {
+  .grid-cols-2,
+  .grid-cols-3,
+  .grid-cols-4 { grid-template-columns: 1fr; }
+
+  .stat-card { padding: 15px; }
+  .stat-value { font-size: 22px; }
+
+  .page-subtitle { display: none; }
+  .topbar-right .btn { display: none; }
+
+  .table-wrap { border-radius: var(--radius); }
+  .table th,
+  .table td { padding: 11px 12px; }
+
+  .modal-overlay { padding: 12px; }
+  .modal { max-height: calc(100vh - 24px); }
+
+  .toast-container {
+    left: 12px;
+    right: 12px;
+    max-width: none;
+  }
+
+  .content { padding: 16px 14px 36px; }
+
+  .section-head { align-items: flex-start; }
+  .section-head .row-wrap { max-width: 100%; }
+}
+
+@media (max-width: 480px) {
+  .brand-name { display: none; }
+  .page-title { font-size: 16px; }
+  .topbar { height: 58px; }
+
+  .btn { padding: 8px 12px; }
+  .card-pad { padding: 16px; }
+  .card-body { padding: 16px; }
+}

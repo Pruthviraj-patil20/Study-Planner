@@ -1,0 +1,162 @@
+/* ==========================================================================
+   StudyFlow — Subjects
+   ========================================================================== */
+
+.subject-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 18px;
+}
+
+.subject-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.15s ease, transform 0.12s ease, border-color 0.15s ease;
+  display: flex;
+  flex-direction: column;
+}
+.subject-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+  border-color: var(--border-strong);
+}
+
+.subject-top { padding: 18px 18px 0; }
+
+.subject-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.subject-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  flex-shrink: 0;
+}
+.subject-avatar svg { width: 20px; height: 20px; stroke: currentColor; }
+
+.subject-head-info { flex: 1; min-width: 0; }
+.subject-head-info h3 {
+  font-size: 15px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.subject-head-info .subject-meta {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  margin-top: 1px;
+}
+
+.subject-actions { display: flex; gap: 4px; opacity: 0; transition: opacity 0.12s ease; }
+.subject-card:hover .subject-actions { opacity: 1; }
+
+.subject-body { padding: 16px 18px 18px; flex: 1; display: flex; flex-direction: column; gap: 12px; }
+
+.subject-progress-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+}
+.subject-progress-head .label { color: var(--text-secondary); font-weight: 600; }
+.subject-progress-head .value { font-weight: 800; font-variant-numeric: tabular-nums; }
+
+.subject-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--text-secondary);
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  margin-top: auto;
+}
+
+/* Color swatches */
+.swatch-row { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.swatch {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform 0.1s ease;
+  position: relative;
+}
+.swatch:hover { transform: scale(1.08); }
+.swatch.selected { border-color: var(--text-primary); }
+.swatch.selected::after {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.85);
+}
+
+/* Icon picker */
+.icon-row { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.icon-option {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg-input);
+  color: var(--text-secondary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+.icon-option svg { width: 18px; height: 18px; stroke: currentColor; }
+.icon-option:hover { border-color: var(--border-strong); color: var(--text-primary); }
+.icon-option.selected {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+/* Chapters */
+.chapter-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+
+.chapter-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 11px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg-input);
+}
+
+.chapter-item label { flex: 1; cursor: pointer; font-size: 13px; color: var(--text-primary); display: flex; align-items: center; gap: 9px; }
+.chapter-item label input[type='checkbox'] { width: 15px; height: 15px; accent-color: var(--primary); cursor: pointer; }
+.chapter-item.done label { text-decoration: line-through; color: var(--text-muted); }
+
+.chapter-add { display: flex; gap: 8px; }
+.chapter-add .input { flex: 1; }
+.chapter-add .btn { flex-shrink: 0; }
+
+.overall-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.overall-bar .progress { flex: 1; height: 10px; }
+
+@media (max-width: 600px) {
+  .subject-actions { opacity: 1; }
+}

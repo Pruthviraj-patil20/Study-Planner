@@ -1,0 +1,183 @@
+/* ==========================================================================
+   StudyFlow — Planner
+   ========================================================================== */
+
+.planner-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.planner-range {
+  font-size: 15px;
+  font-weight: 700;
+  margin-left: 6px;
+  color: var(--text-primary);
+}
+
+.btn-group .pill { border-radius: 0; border-color: transparent; }
+.btn-group { border-radius: 10px; }
+.btn-group .pill + .pill { border-left: 1px solid var(--border); }
+.btn-group .pill.active { background: var(--primary-soft); }
+
+/* Week head */
+.week-head {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  border-bottom: 1px solid var(--border);
+}
+
+.week-head-cell {
+  padding: 12px 8px;
+  text-align: center;
+  cursor: pointer;
+  transition: background 0.12s ease;
+  border-left: 1px solid var(--border);
+}
+.week-head-cell:first-child { border-left: none; }
+.week-head-cell:hover { background: var(--bg-hover); }
+
+.week-head-cell .wd { font-size: 11px; font-weight: 650; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); }
+.week-head-cell .dn {
+  width: 30px;
+  height: 30px;
+  margin: 4px auto 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.week-head-cell.is-today .dn {
+  background: var(--primary);
+  color: #fff;
+}
+.week-head-cell.is-selected { background: var(--primary-soft); }
+.week-head-cell.is-selected .dn { background: var(--primary); color: #fff; }
+
+/* Week grid */
+.week-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  min-height: 420px;
+}
+
+.week-day {
+  border-left: 1px solid var(--border);
+  padding: 8px;
+  min-width: 0;
+}
+.week-day:first-child { border-left: none; }
+.week-day.is-today { background: var(--bg-sunken); }
+
+.week-day .empty-day {
+  color: var(--text-muted);
+  font-size: 11.5px;
+  text-align: center;
+  padding: 18px 0;
+}
+
+/* Session chip */
+.session-chip {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  padding: 8px 9px;
+  margin-bottom: 7px;
+  cursor: pointer;
+  background: var(--primary-soft);
+  transition: box-shadow 0.12s ease, transform 0.1s ease;
+}
+.session-chip:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+.session-chip.done { opacity: 0.55; }
+
+.session-chip .chip-time {
+  display: block;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+.session-chip .chip-topic {
+  display: block;
+  font-size: 12px;
+  font-weight: 650;
+  color: var(--text-primary);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.session-chip.done .chip-topic { text-decoration: line-through; }
+
+.chip-subject {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 4px;
+  font-size: 10.5px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* Day view timeline */
+.day-timeline { display: flex; flex-direction: column; gap: 10px; }
+
+.day-session {
+  display: flex;
+  gap: 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+  transition: border-color 0.12s ease;
+}
+.day-session:hover { border-color: var(--border-strong); }
+.day-session.done { opacity: 0.6; }
+.day-session.done .ds-title { text-decoration: line-through; }
+
+.ds-time {
+  width: 86px;
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  padding-top: 2px;
+}
+
+.ds-color { width: 4px; border-radius: 4px; flex-shrink: 0; align-self: stretch; }
+
+.ds-main { flex: 1; min-width: 0; }
+.ds-title { font-size: 14px; font-weight: 700; }
+.ds-sub { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+.ds-notes { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+
+.ds-actions { display: flex; align-items: center; gap: 6px; }
+
+/* Priority chips */
+.priority-dot { display: inline-block; width: 8px; height: 8px; border-radius: 999px; margin-right: 6px; }
+.p-high { background: var(--danger); }
+.p-medium { background: var(--warning); }
+.p-low { background: var(--success); }
+
+@media (max-width: 900px) {
+  .week-head, .week-grid { grid-template-columns: repeat(7, minmax(150px, 1fr)); }
+  .card#week-view { overflow-x: auto; }
+  .week-head, .week-grid { min-width: 900px; }
+  .planner-toolbar { align-items: flex-start; }
+}
+
+@media (max-width: 480px) {
+  .ds-time { width: 64px; font-size: 11px; }
+  .ds-actions .btn { padding: 6px 8px; }
+}

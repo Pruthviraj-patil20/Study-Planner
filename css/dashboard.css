@@ -1,0 +1,174 @@
+/* ==========================================================================
+   StudyFlow — Dashboard
+   ========================================================================== */
+
+.welcome {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+
+.welcome h2 {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.welcome p {
+  color: var(--text-secondary);
+  margin-top: 3px;
+  font-size: 13px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.dash-card { min-width: 0; }
+
+/* Today's schedule */
+.session-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--border);
+}
+.session-item:last-child { border-bottom: none; }
+
+.session-time {
+  font-size: 12px;
+  font-weight: 650;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  width: 46px;
+  flex-shrink: 0;
+}
+
+.session-info { flex: 1; min-width: 0; }
+.session-info strong {
+  font-size: 13px;
+  display: block;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.session-info small {
+  color: var(--text-secondary);
+  font-size: 11.5px;
+}
+
+/* Subject progress rows */
+.subject-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 0;
+}
+.subject-row .subject-name {
+  width: 120px;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.subject-row .progress { flex: 1; }
+.subject-row .subject-pct {
+  width: 44px;
+  text-align: right;
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Upcoming exams */
+.exam-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--border);
+}
+.exam-item:last-child { border-bottom: none; }
+
+.exam-date-badge {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  background: var(--bg-sunken);
+  border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.exam-date-badge .d { font-size: 16px; font-weight: 800; line-height: 1; }
+.exam-date-badge .m { font-size: 10px; font-weight: 650; text-transform: uppercase; color: var(--text-muted); }
+
+.exam-info { flex: 1; min-width: 0; }
+.exam-info strong { font-size: 13px; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.exam-info small { color: var(--text-secondary); font-size: 11.5px; }
+
+/* Quick actions */
+.quick-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.quick-action {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  transition: border-color 0.15s ease, background 0.15s ease, transform 0.1s ease;
+}
+.quick-action:hover {
+  border-color: var(--primary-border);
+  background: var(--bg-card);
+  transform: translateY(-1px);
+}
+.quick-action strong { font-size: 13px; display: block; }
+.quick-action small { font-size: 11.5px; color: var(--text-muted); }
+
+.qa-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.qa-icon svg { width: 18px; height: 18px; stroke: currentColor; }
+
+/* Empty states inside cards */
+.inline-empty {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 12.5px;
+  padding: 22px 8px;
+}
+
+@media (max-width: 900px) {
+  .dashboard-grid { grid-template-columns: 1fr; }
+}

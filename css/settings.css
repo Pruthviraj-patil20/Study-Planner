@@ -1,0 +1,32 @@
+/* ==========================================================================
+   StudyFlow — Settings
+   ========================================================================== */
+
+.settings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 18px;
+  align-items: start;
+}
+
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.setting-name { font-size: 13.5px; font-weight: 650; }
+.setting-desc { font-size: 12px; color: var(--text-secondary); margin-top: 2px; max-width: 320px; }
+
+.danger-zone { border-color: color-mix(in srgb, var(--danger) 35%, var(--border)); }
+
+#btn-reset-all { width: 100%; }
+
+@media (max-width: 480px) {
+  .settings-grid { grid-template-columns: 1fr; }
+  .setting-row { flex-direction: column; align-items: flex-start; }
+  .setting-row .btn-group { width: 100%; }
+  .setting-row .btn-group .btn { flex: 1; }
+}
