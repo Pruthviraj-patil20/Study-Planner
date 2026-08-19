@@ -145,14 +145,16 @@ window.StudyFlow = window.StudyFlow || {};
       { name: 'Physics', color: '#0ea5e9', icon: 'atom', target: 70, chapters: [] },
       { name: 'Data Structures', color: '#10b981', icon: 'code', target: 85, chapters: [] },
       { name: 'Web Development', color: '#f59e0b', icon: 'layout', target: 75, chapters: [] },
-      { name: 'Database Management', color: '#ec4899', icon: 'database', target: 65, chapters: [] }
+      { name: 'Database Management', color: '#ec4899', icon: 'database', target: 65, chapters: [] },
+      { name: 'Ai Finance', color: '#8b5cf6', icon: 'chart', target: 75, chapters: [] }
     ].map((s) => {
       const chapterNames = {
         Mathematics: ['Limits & Continuity', 'Differentiation', 'Integration', 'Linear Algebra', 'Probability', 'Differential Equations'],
         Physics: ['Kinematics', 'Laws of Motion', 'Thermodynamics', 'Electrostatics', 'Optics'],
         'Data Structures': ['Arrays & Strings', 'Linked Lists', 'Stacks & Queues', 'Trees', 'Graphs', 'Hashing', 'Dynamic Programming'],
         'Web Development': ['HTML & CSS', 'JavaScript Basics', 'DOM Manipulation', 'Responsive Design', 'Fetch & APIs'],
-        'Database Management': ['ER Models', 'SQL Basics', 'Normalization', 'Transactions', 'Indexing']
+        'Database Management': ['ER Models', 'SQL Basics', 'Normalization', 'Transactions', 'Indexing'],
+        'Ai Finance': ['Financial Time Series & Forecasting', 'Algorithmic Trading Strategies', 'Machine Learning in Portfolio Management', 'Risk Modeling & Credit Scoring', 'Sentiment Analysis & NLP in Markets']
       }[s.name] || ['Chapter 1', 'Chapter 2', 'Chapter 3'];
 
       return Object.assign({}, s, {
@@ -247,7 +249,30 @@ window.StudyFlow = window.StudyFlow || {};
   }
 
   function seedIfNeeded() {
-    if (loadData(KEYS.seeded, false) === true) return;
+    if (loadData(KEYS.seeded, false) === true) {
+      const existing = loadData(KEYS.subjects, []);
+      if (Array.isArray(existing) && !existing.some((s) => s.name && s.name.toLowerCase() === 'ai finance')) {
+        const now = Date.now();
+        const id = (p) => p + '_' + now.toString(36) + Math.random().toString(36).slice(2, 7);
+        const chapterNames = ['Financial Time Series & Forecasting', 'Algorithmic Trading Strategies', 'Machine Learning in Portfolio Management', 'Risk Modeling & Credit Scoring', 'Sentiment Analysis & NLP in Markets'];
+        const aiFinance = {
+          id: id('subj'),
+          name: 'Ai Finance',
+          color: '#8b5cf6',
+          icon: 'chart',
+          target: 75,
+          createdAt: isoWithOffset(-20, 9, 0),
+          chapters: chapterNames.map((name, i) => ({
+            id: id('chap'),
+            name,
+            completed: i < Math.floor(chapterNames.length * 0.45)
+          }))
+        };
+        existing.push(aiFinance);
+        saveData(KEYS.subjects, existing);
+      }
+      return;
+    }
     const data = buildSeedData();
     saveData(KEYS.subjects, data.subjects);
     saveData(KEYS.tasks, data.tasks);
