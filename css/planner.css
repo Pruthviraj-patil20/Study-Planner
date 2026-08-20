@@ -90,7 +90,7 @@
   border: 1px solid transparent;
   border-radius: 10px;
   padding: 8px 9px;
-  margin-bottom: 7px;
+  margin-bottom: 19px;
   cursor: pointer;
   background: var(--primary-soft);
   transition: box-shadow 0.12s ease, transform 0.1s ease;
@@ -131,7 +131,7 @@
 }
 
 /* Day view timeline */
-.day-timeline { display: flex; flex-direction: column; gap: 10px; }
+.day-timeline { display: flex; flex-direction: column; gap: 22px; }
 
 .day-session {
   display: flex;
