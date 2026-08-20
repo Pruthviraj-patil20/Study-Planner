@@ -197,8 +197,9 @@
     const bgLayer = document.createElement('div');
     bgLayer.className = 'study-bg-layer';
     bgLayer.setAttribute('aria-hidden', 'true');
+    bgLayer.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;width:100vw;height:100vh;pointer-events:none;z-index:0;overflow:hidden;margin:0;padding:0;';
     bgLayer.innerHTML = `
-      <svg class="study-bg-svg" viewBox="0 0 1600 1000" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+      <svg class="study-bg-svg" viewBox="0 0 1600 1000" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;">
         <defs>
           <linearGradient id="study-stroke-indigo" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stop-color="#6366f1" stop-opacity="0.22" />
