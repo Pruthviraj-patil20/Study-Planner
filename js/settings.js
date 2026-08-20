@@ -15,6 +15,7 @@
     const current = T.current();
     const lightBtn = document.getElementById('theme-light');
     const darkBtn = document.getElementById('theme-dark');
+    const rainbowBtn = document.getElementById('theme-rainbow');
 
     if (lightBtn) {
       const isLight = current === 'light';
@@ -30,12 +31,20 @@
       darkBtn.setAttribute('aria-pressed', isDark ? 'true' : 'false');
     }
 
+    if (rainbowBtn) {
+      const isRainbow = current === 'rainbow';
+      rainbowBtn.classList.toggle('is-active', isRainbow);
+      rainbowBtn.classList.toggle('active', isRainbow);
+      rainbowBtn.setAttribute('aria-pressed', isRainbow ? 'true' : 'false');
+    }
+
     if (T.syncButton) T.syncButton();
   }
 
   function bindAppearance() {
     const lightBtn = document.getElementById('theme-light');
     const darkBtn = document.getElementById('theme-dark');
+    const rainbowBtn = document.getElementById('theme-rainbow');
 
     if (lightBtn) {
       lightBtn.addEventListener('click', () => {
@@ -50,6 +59,14 @@
         T.apply('dark');
         syncThemeButtons();
         StudyFlow.UI.showToast('Dark theme applied.', 'info');
+      });
+    }
+
+    if (rainbowBtn) {
+      rainbowBtn.addEventListener('click', () => {
+        T.apply('rainbow');
+        syncThemeButtons();
+        StudyFlow.UI.showToast('Rainbow theme applied! 🌈', 'info');
       });
     }
 
