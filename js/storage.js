@@ -1,6 +1,9 @@
 /* ==========================================================================
    StudyFlow — Storage Layer
-   Centralized LocalStorage operations + first-launch seed data.
+   Centralized LocalStorage operations. All data is namespaced per
+   authenticated user so one user can never read another user's data.
+   The public typed accessors (getSubjects, setTasks, ...) automatically
+   resolve to the currently signed-in user's namespace.
    ========================================================================== */
 
 window.StudyFlow = window.StudyFlow || {};
@@ -8,7 +11,19 @@ window.StudyFlow = window.StudyFlow || {};
 (function () {
   'use strict';
 
-  const KEYS = {
+  const TYPES = {
+    subjects: 'subjects',
+    tasks: 'tasks',
+    sessions: 'sessions',
+    exams: 'exams',
+    notes: 'notes',
+    focus: 'focus_sessions',
+    settings: 'settings',
+    seeded: 'seeded'
+  };
+
+  /* Legacy keys used by the original single-user version. */
+  const LEGACY_KEYS = {
     subjects: 'studyflow_subjects',
     tasks: 'studyflow_tasks',
     sessions: 'studyflow_sessions',
@@ -16,9 +31,10 @@ window.StudyFlow = window.StudyFlow || {};
     notes: 'studyflow_notes',
     focus: 'studyflow_focus_sessions',
     settings: 'studyflow_settings',
-    theme: 'studyflow_theme',
     seeded: 'studyflow_seeded'
   };
+
+  const KEYS = LEGACY_KEYS;
 
   const DEFAULT_SETTINGS = {
     dailyGoal: 120,
@@ -26,6 +42,17 @@ window.StudyFlow = window.StudyFlow || {};
     breakDefault: 5,
     weekStart: 0
   };
+
+  /* ---------- Key resolution ---------- */
+
+  function scopedKey(type, uid) {
+    uid = uid || (StudyFlow.Auth ? StudyFlow.Auth.currentUserId() : null);
+    return uid ? 'studyflow_user_' + uid + '_' + TYPES[type] : LEGACY_KEYS[type];
+  }
+
+  function currentUserId() {
+    return StudyFlow.Auth ? StudyFlow.Auth.currentUserId() : null;
+  }
 
   /* ---------- Core primitives ---------- */
 
@@ -67,59 +94,34 @@ window.StudyFlow = window.StudyFlow || {};
   }
 
   function clearAllData() {
-    Object.keys(KEYS).forEach((k) => {
-      try { localStorage.removeItem(KEYS[k]); } catch (err) { /* noop */ }
+    const uid = currentUserId();
+    Object.keys(TYPES).forEach((type) => {
+      deleteData(scopedKey(type, uid));
     });
   }
 
-  /* ---------- Typed accessors ---------- */
+  /* ---------- Typed accessors (user-scoped) ---------- */
 
-  function getSubjects() {
-    return loadData(KEYS.subjects, []);
-  }
-  function setSubjects(list) {
-    return saveData(KEYS.subjects, list);
-  }
-  function getTasks() {
-    return loadData(KEYS.tasks, []);
-  }
-  function setTasks(list) {
-    return saveData(KEYS.tasks, list);
-  }
-  function getSessions() {
-    return loadData(KEYS.sessions, []);
-  }
-  function setSessions(list) {
-    return saveData(KEYS.sessions, list);
-  }
-  function getExams() {
-    return loadData(KEYS.exams, []);
-  }
-  function setExams(list) {
-    return saveData(KEYS.exams, list);
-  }
-  function getNotes() {
-    return loadData(KEYS.notes, []);
-  }
-  function setNotes(list) {
-    return saveData(KEYS.notes, list);
-  }
-  function getFocusSessions() {
-    return loadData(KEYS.focus, []);
-  }
-  function setFocusSessions(list) {
-    return saveData(KEYS.focus, list);
-  }
-  function getSettings() {
-    return Object.assign({}, DEFAULT_SETTINGS, loadData(KEYS.settings, {}));
-  }
+  function getSubjects() { return loadData(scopedKey('subjects'), []); }
+  function setSubjects(list) { return saveData(scopedKey('subjects'), list); }
+  function getTasks() { return loadData(scopedKey('tasks'), []); }
+  function setTasks(list) { return saveData(scopedKey('tasks'), list); }
+  function getSessions() { return loadData(scopedKey('sessions'), []); }
+  function setSessions(list) { return saveData(scopedKey('sessions'), list); }
+  function getExams() { return loadData(scopedKey('exams'), []); }
+  function setExams(list) { return saveData(scopedKey('exams'), list); }
+  function getNotes() { return loadData(scopedKey('notes'), []); }
+  function setNotes(list) { return saveData(scopedKey('notes'), list); }
+  function getFocusSessions() { return loadData(scopedKey('focus'), []); }
+  function setFocusSessions(list) { return saveData(scopedKey('focus'), list); }
+  function getSettings() { return Object.assign({}, DEFAULT_SETTINGS, loadData(scopedKey('settings'), {})); }
   function setSettings(patch) {
     const merged = Object.assign({}, getSettings(), patch);
-    saveData(KEYS.settings, merged);
+    saveData(scopedKey('settings'), merged);
     return merged;
   }
 
-  /* ---------- Seed data (first launch only) ---------- */
+  /* ---------- Seed data (per user, on first launch of their account) ---------- */
 
   function pad2(n) { return String(n).padStart(2, '0'); }
   function isoDaysFromNow(days) {
@@ -248,40 +250,64 @@ window.StudyFlow = window.StudyFlow || {};
     return { subjects, tasks, sessions, exams, notes, focus };
   }
 
-  function seedIfNeeded() {
-    if (loadData(KEYS.seeded, false) === true) {
-      const existing = loadData(KEYS.subjects, []);
-      if (Array.isArray(existing) && !existing.some((s) => s.name && s.name.toLowerCase() === 'ai finance')) {
-        const now = Date.now();
-        const id = (p) => p + '_' + now.toString(36) + Math.random().toString(36).slice(2, 7);
-        const chapterNames = ['Financial Time Series & Forecasting', 'Algorithmic Trading Strategies', 'Machine Learning in Portfolio Management', 'Risk Modeling & Credit Scoring', 'Sentiment Analysis & NLP in Markets'];
-        const aiFinance = {
-          id: id('subj'),
-          name: 'Ai Finance',
-          color: '#8b5cf6',
-          icon: 'chart',
-          target: 75,
-          createdAt: isoWithOffset(-20, 9, 0),
-          chapters: chapterNames.map((name, i) => ({
-            id: id('chap'),
-            name,
-            completed: i < Math.floor(chapterNames.length * 0.45)
-          }))
-        };
-        existing.push(aiFinance);
-        saveData(KEYS.subjects, existing);
-      }
-      return;
+  function seedForUser(uid, options) {
+    uid = uid || currentUserId();
+    if (!uid) return false;
+    const importLegacy = options && options.importLegacy;
+
+    if (importLegacy && migrateLegacy(uid)) {
+      saveData(scopedKey('seeded', uid), true);
+      return true;
     }
+
     const data = buildSeedData();
-    saveData(KEYS.subjects, data.subjects);
-    saveData(KEYS.tasks, data.tasks);
-    saveData(KEYS.sessions, data.sessions);
-    saveData(KEYS.exams, data.exams);
-    saveData(KEYS.notes, data.notes);
-    saveData(KEYS.focus, data.focus);
-    saveData(KEYS.settings, DEFAULT_SETTINGS);
-    saveData(KEYS.seeded, true);
+    saveData(scopedKey('subjects', uid), data.subjects);
+    saveData(scopedKey('tasks', uid), data.tasks);
+    saveData(scopedKey('sessions', uid), data.sessions);
+    saveData(scopedKey('exams', uid), data.exams);
+    saveData(scopedKey('notes', uid), data.notes);
+    saveData(scopedKey('focus', uid), data.focus);
+    saveData(scopedKey('settings', uid), DEFAULT_SETTINGS);
+    saveData(scopedKey('seeded', uid), true);
+    return true;
+  }
+
+  function seedIfNeeded() {
+    const uid = currentUserId();
+    if (!uid) return false;
+    if (loadData(scopedKey('seeded', uid), false) === true) return false;
+    return seedForUser(uid, { importLegacy: hasLegacyData() });
+  }
+
+  /* ---------- Legacy (pre-auth) data migration ---------- */
+
+  function hasLegacyData() {
+    return Object.keys(TYPES).some((type) => localStorage.getItem(LEGACY_KEYS[type]) !== null);
+  }
+
+  function migrateLegacy(uid) {
+    uid = uid || currentUserId();
+    if (!uid) return false;
+    let migrated = false;
+    Object.keys(TYPES).forEach((type) => {
+      const raw = localStorage.getItem(LEGACY_KEYS[type]);
+      if (raw !== null) {
+        try {
+          localStorage.setItem(scopedKey(type, uid), raw);
+        } catch (err) { /* noop */ }
+        localStorage.removeItem(LEGACY_KEYS[type]);
+        migrated = true;
+      }
+    });
+    return migrated;
+  }
+
+  function clearUserData(uid) {
+    uid = uid || currentUserId();
+    if (!uid) return;
+    Object.keys(TYPES).forEach((type) => {
+      deleteData(scopedKey(type, uid));
+    });
   }
 
   /* ---------- Export ---------- */
@@ -289,6 +315,7 @@ window.StudyFlow = window.StudyFlow || {};
   StudyFlow.Storage = {
     KEYS,
     DEFAULT_SETTINGS,
+    TYPES,
     saveData,
     loadData,
     deleteData,
@@ -308,6 +335,10 @@ window.StudyFlow = window.StudyFlow || {};
     setFocusSessions,
     getSettings,
     setSettings,
-    seedIfNeeded
+    seedIfNeeded,
+    seedForUser,
+    hasLegacyData,
+    migrateLegacy,
+    clearUserData
   };
 })();

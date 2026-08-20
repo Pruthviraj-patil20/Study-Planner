@@ -479,13 +479,139 @@
     document.body.prepend(bgLayer);
   }
 
+  /* ---------- Auth guard ---------- */
+
+  function showAuthGate() {
+    const gate = document.createElement('div');
+    gate.className = 'auth-gate';
+    gate.innerHTML =
+      '<div class="auth-gate-card">' +
+        '<div class="auth-gate-logo">SF</div>' +
+        '<div class="auth-gate-title">Please sign in</div>' +
+        '<div class="auth-gate-sub">Redirecting you to the secure login…</div>' +
+        '<div class="auth-gate-spinner"></div>' +
+      '</div>';
+    document.body.appendChild(gate);
+  }
+
+  /* ---------- Profile widget (top-right) ---------- */
+
+  function profileSvg(kind) {
+    if (kind === 'edit') {
+      return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.8 2.8 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"/></svg>';
+    }
+    if (kind === 'settings') {
+      return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>';
+    }
+    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>';
+  }
+
+  function initProfileWidget(user) {
+    const host = document.querySelector('.topbar-right');
+    if (!host) return;
+
+    const widget = document.createElement('div');
+    widget.className = 'profile-widget';
+    widget.id = 'profile-widget';
+    widget.innerHTML =
+      '<button type="button" class="profile-trigger" id="profile-trigger" aria-haspopup="true" aria-expanded="false" aria-label="Account menu">' +
+        '<img class="profile-avatar" id="profile-avatar" alt="" referrerpolicy="no-referrer">' +
+        '<span class="profile-meta">' +
+          '<span class="profile-name" id="profile-name"></span>' +
+          '<span class="profile-email" id="profile-email"></span>' +
+        '</span>' +
+        '<svg class="profile-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>' +
+      '</button>' +
+      '<div class="profile-menu" id="profile-menu" role="menu" aria-label="Account">' +
+        '<div class="profile-menu-header">' +
+          '<img class="profile-menu-avatar" id="profile-menu-avatar" alt="" referrerpolicy="no-referrer">' +
+          '<div class="profile-menu-id">' +
+            '<div class="profile-menu-name" id="profile-menu-name"></div>' +
+            '<div class="profile-menu-email" id="profile-menu-email"></div>' +
+          '</div>' +
+        '</div>' +
+        '<a class="profile-menu-item" href="profile.html" role="menuitem">' + profileSvg('edit') + 'Edit profile</a>' +
+        '<a class="profile-menu-item" href="settings.html" role="menuitem">' + profileSvg('settings') + 'Account settings</a>' +
+        '<button type="button" class="profile-menu-item profile-menu-logout" id="profile-logout" role="menuitem">' + profileSvg('logout') + 'Log out</button>' +
+      '</div>';
+    host.appendChild(widget);
+
+    const avatarEl = widget.querySelector('#profile-avatar');
+    const nameEl = widget.querySelector('#profile-name');
+    const emailEl = widget.querySelector('#profile-email');
+    const menuAvatarEl = widget.querySelector('#profile-menu-avatar');
+    const menuNameEl = widget.querySelector('#profile-menu-name');
+    const menuEmailEl = widget.querySelector('#profile-menu-email');
+    const trigger = widget.querySelector('#profile-trigger');
+    const menu = widget.querySelector('#profile-menu');
+    const logoutBtn = widget.querySelector('#profile-logout');
+
+    function refresh() {
+      const u = StudyFlow.Auth.currentUser();
+      if (!u) return;
+      const src = StudyFlow.Auth.avatarSrc(u);
+      avatarEl.src = src;
+      avatarEl.alt = u.name + ' avatar';
+      menuAvatarEl.src = src;
+      menuAvatarEl.alt = u.name + ' avatar';
+      nameEl.textContent = u.name;
+      emailEl.textContent = u.email;
+      menuNameEl.textContent = u.name;
+      menuEmailEl.textContent = u.email;
+    }
+    refresh();
+
+    function setOpen(open) {
+      menu.classList.toggle('open', open);
+      trigger.classList.toggle('open', open);
+      trigger.setAttribute('aria-expanded', open ? 'true' : 'false');
+    }
+
+    trigger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      setOpen(!menu.classList.contains('open'));
+    });
+    trigger.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        setOpen(!menu.classList.contains('open'));
+      }
+    });
+    document.addEventListener('click', (e) => {
+      if (!widget.contains(e.target)) setOpen(false);
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') setOpen(false);
+    });
+
+    logoutBtn.addEventListener('click', () => {
+      StudyFlow.Auth.logout();
+      window.location.replace('auth.html');
+    });
+
+    document.addEventListener('studyflow:profile-updated', refresh);
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'studyflow_session' || e.key === 'studyflow_users') {
+        window.location.reload();
+      }
+    });
+  }
+
   /* ---------- Boot ---------- */
 
   document.addEventListener('DOMContentLoaded', () => {
+    const user = StudyFlow.Auth.restoreSession();
+    if (!user) {
+      showAuthGate();
+      StudyFlow.Auth.redirectToLogin();
+      return;
+    }
+
     StudyFlow.Storage.seedIfNeeded();
     StudyFlow.Theme.init();
     ensureBackgroundIllustration();
     initSidebar();
+    initProfileWidget(user);
     StudyFlow.Modal = { openModal, closeModal, confirmDialog };
     StudyFlow.UI = { showToast };
     document.dispatchEvent(new CustomEvent('studyflow:ready'));

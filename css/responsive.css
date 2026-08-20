@@ -131,6 +131,10 @@
     gap: 5px;
   }
 
+  /* Profile widget — compact on tablets */
+  .profile-email { display: none; }
+  .profile-name { max-width: 110px; }
+
   /* Tables & scrolling containers */
   .table-wrap {
     border-radius: var(--radius);
@@ -165,6 +169,12 @@
   }
   .topbar-left { gap: 10px; }
   .content { padding: 14px 12px 32px; }
+
+  /* Profile widget — avatar-only on phones */
+  .profile-meta { display: none; }
+  .profile-trigger { padding: 4px; }
+  .profile-caret { display: none; }
+  .profile-menu { min-width: 220px; }
 
   /* Buttons & Cards */
   .btn { padding: 7px 11px; font-size: 12.5px; }

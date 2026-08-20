@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Manage your StudyFlow profile and account.">
+  <title>Profile · StudyFlow</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/profile.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body data-page="profile">
+
+  <div class="app-layout">
+
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <a href="index.html" class="brand">
+          <span class="brand-logo">SF</span>
+          <span class="brand-name">StudyFlow</span>
+        </a>
+        <button class="icon-btn sidebar-close" id="sidebar-close" aria-label="Close navigation menu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <nav class="sidebar-nav" aria-label="Primary">
+        <a href="index.html" class="nav-link" data-nav="dashboard">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+          <span>Dashboard</span>
+        </a>
+        <a href="planner.html" class="nav-link" data-nav="planner">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          <span>Planner</span>
+        </a>
+        <a href="subjects.html" class="nav-link" data-nav="subjects">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+          <span>Subjects</span>
+        </a>
+        <a href="tasks.html" class="nav-link" data-nav="tasks">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          <span>Tasks</span>
+        </a>
+        <a href="exams.html" class="nav-link" data-nav="exams">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+          <span>Exams</span>
+        </a>
+        <a href="focus.html" class="nav-link" data-nav="focus">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <span>Focus</span>
+        </a>
+        <a href="analytics.html" class="nav-link" data-nav="analytics">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          <span>Analytics</span>
+        </a>
+        <a href="notes.html" class="nav-link" data-nav="notes">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          <span>Notes</span>
+        </a>
+        <a href="settings.html" class="nav-link" data-nav="settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          <span>Settings</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="streak-mini">
+          <span class="streak-flame" aria-hidden="true">&#128293;</span>
+          <div>
+            <div class="streak-label">Study streak</div>
+            <div class="streak-value"><span id="sidebar-streak">0</span> days</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
+    <div class="main">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="icon-btn menu-toggle" id="menu-toggle" aria-label="Open navigation menu">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          </button>
+          <div>
+            <h1 class="page-title">Profile</h1>
+            <p class="page-subtitle">Manage your account and personal details</p>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <button class="icon-btn" id="theme-toggle" aria-label="Toggle theme"></button>
+        </div>
+      </header>
+
+      <main class="content">
+        <section class="profile-head">
+          <div class="profile-head-avatar-wrap">
+            <img class="profile-head-avatar" id="head-avatar" alt="" referrerpolicy="no-referrer">
+            <span class="profile-head-badge" id="head-verified" title="Verified email">&#10003;</span>
+          </div>
+          <div class="profile-head-info">
+            <h2 id="head-name">—</h2>
+            <p id="head-email">—</p>
+            <p class="profile-head-meta" id="head-since">Member since —</p>
+            <span class="badge" id="head-status"></span>
+          </div>
+        </section>
+
+        <div class="profile-grid">
+
+          <div class="card">
+            <div class="card-header">
+              <h2 class="card-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                Personal Information
+              </h2>
+            </div>
+            <div class="card-body">
+              <form id="profile-form" novalidate>
+                <div class="profile-photo-row">
+                  <img class="profile-photo" id="form-avatar" alt="Profile photo" referrerpolicy="no-referrer">
+                  <div>
+                    <div class="setting-name">Profile photo</div>
+                    <div class="setting-desc">Upload a photo or use your initials avatar.</div>
+                    <div class="row-wrap mt-4">
+                      <input type="file" id="avatar-file" accept="image/*" hidden>
+                      <button type="button" class="btn btn-soft btn-sm" id="btn-upload-photo">Upload photo</button>
+                      <button type="button" class="btn btn-ghost btn-sm" id="btn-remove-photo">Remove</button>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-2">
+                  <div class="form-field">
+                    <label for="profile-name">Full name</label>
+                    <input type="text" class="input" id="profile-name" autocomplete="name" required>
+                  </div>
+                  <div class="form-field">
+                    <label for="profile-email">Email address</label>
+                    <input type="email" class="input" id="profile-email" autocomplete="email" required>
+                    <div class="form-hint" id="email-hint"></div>
+                  </div>
+                </div>
+
+                <div class="form-field">
+                  <label for="profile-bio">Bio</label>
+                  <textarea class="textarea" id="profile-bio" placeholder="A short introduction about you…"></textarea>
+                </div>
+
+                <div class="grid grid-cols-2">
+                  <div class="form-field">
+                    <label for="profile-institution">Institution / School</label>
+                    <input type="text" class="input" id="profile-institution" placeholder="e.g. University of Example" autocomplete="organization">
+                  </div>
+                  <div class="form-field">
+                    <label for="profile-course">Course / Year</label>
+                    <input type="text" class="input" id="profile-course" placeholder="e.g. Computer Science, Year 2">
+                  </div>
+                </div>
+
+                <div class="form-field">
+                  <label for="profile-phone">Phone number</label>
+                  <input type="tel" class="input" id="profile-phone" placeholder="+1 555 000 1234" autocomplete="tel">
+                </div>
+
+                <div class="profile-error hidden" id="profile-error"></div>
+                <button type="submit" class="btn btn-primary" id="btn-save-profile">
+                  <span class="btn-label">Save changes</span>
+                </button>
+              </form>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h2 class="card-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                Change Password
+              </h2>
+            </div>
+            <div class="card-body">
+              <form id="password-form" novalidate>
+                <div class="form-field">
+                  <label for="pw-current">Current password</label>
+                  <input type="password" class="input" id="pw-current" autocomplete="current-password" required>
+                </div>
+                <div class="grid grid-cols-2">
+                  <div class="form-field">
+                    <label for="pw-new">New password</label>
+                    <input type="password" class="input" id="pw-new" autocomplete="new-password" placeholder="Min. 8 characters" required>
+                  </div>
+                  <div class="form-field">
+                    <label for="pw-confirm">Confirm new password</label>
+                    <input type="password" class="input" id="pw-confirm" autocomplete="new-password" placeholder="Repeat new password" required>
+                  </div>
+                </div>
+                <div class="profile-error hidden" id="password-error"></div>
+                <button type="submit" class="btn btn-primary" id="btn-save-password">
+                  <span class="btn-label">Update password</span>
+                </button>
+              </form>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h2 class="card-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                Account
+              </h2>
+            </div>
+            <div class="card-body">
+              <div class="setting-row">
+                <div>
+                  <div class="setting-name">Email verification</div>
+                  <div class="setting-desc" id="verify-desc">Verify your email address to secure your account.</div>
+                </div>
+                <button class="btn btn-soft btn-sm" id="btn-verify-now" hidden>Verify now</button>
+              </div>
+              <div class="setting-row">
+                <div>
+                  <div class="setting-name">Study preferences</div>
+                  <div class="setting-desc">Daily goals, focus duration, week start and appearance.</div>
+                </div>
+                <a href="settings.html" class="btn btn-soft btn-sm">Open settings</a>
+              </div>
+              <div class="setting-row">
+                <div>
+                  <div class="setting-name">Sign out</div>
+                  <div class="setting-desc">End this session on this device.</div>
+                </div>
+                <button class="btn btn-ghost btn-sm" id="btn-logout">Log out</button>
+              </div>
+              <div class="setting-row danger">
+                <div>
+                  <div class="setting-name" style="color:var(--danger)">Delete account</div>
+                  <div class="setting-desc">Permanently delete your account and all of your data. This cannot be undone.</div>
+                </div>
+                <button class="btn btn-danger btn-sm" id="btn-delete-account">Delete account</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="js/auth.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/theme.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/profile.js"></script>
+</body>
+</html>

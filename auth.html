@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Sign in or create your StudyFlow account.">
+  <title>Sign in · StudyFlow</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/auth.css">
+</head>
+<body data-page="auth">
+
+  <!-- Ambient background -->
+  <div class="study-bg-layer" aria-hidden="true">
+    <svg class="study-bg-svg" viewBox="0 0 1600 1000" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+      <defs>
+        <linearGradient id="auth-glow-blur">
+          <stop offset="0%" stop-color="#e0e7ff" stop-opacity="0.4" />
+        </linearGradient>
+        <filter id="auth-blur"><feGaussianBlur stdDeviation="90" /></filter>
+      </defs>
+      <g filter="url(#auth-blur)">
+        <circle cx="300" cy="200" r="180" fill="#e0e7ff" fill-opacity="0.5" />
+        <circle cx="1300" cy="180" r="220" fill="#ede9fe" fill-opacity="0.5" />
+        <circle cx="820" cy="860" r="200" fill="#e0f2fe" fill-opacity="0.45" />
+        <circle cx="1400" cy="840" r="170" fill="#fdf2f8" fill-opacity="0.4" />
+      </g>
+    </svg>
+  </div>
+
+  <main class="auth-shell">
+    <div class="auth-card" id="auth-card">
+
+      <div class="auth-brand">
+        <a href="index.html" class="brand">
+          <span class="brand-logo">SF</span>
+          <span class="brand-name">StudyFlow</span>
+        </a>
+      </div>
+
+      <div class="auth-tabs" id="auth-tabs" role="tablist" aria-label="Authentication">
+        <button class="auth-tab active" id="tab-login" role="tab" aria-selected="true">Sign in</button>
+        <button class="auth-tab" id="tab-signup" role="tab" aria-selected="false">Create account</button>
+      </div>
+
+      <!-- ============ SIGN IN ============ -->
+      <section class="auth-panel" id="panel-login" role="tabpanel">
+        <header class="auth-head">
+          <h1 class="auth-title">Welcome back</h1>
+          <p class="auth-sub">Sign in to your StudyFlow workspace</p>
+        </header>
+        <form id="login-form" novalidate>
+          <div class="form-field">
+            <label for="login-email">Email address</label>
+            <input type="email" class="input" id="login-email" autocomplete="email" placeholder="you@example.com" required>
+          </div>
+          <div class="form-field">
+            <label for="login-password">Password</label>
+            <input type="password" class="input" id="login-password" autocomplete="current-password" placeholder="••••••••" required>
+          </div>
+          <div class="auth-row-between">
+            <label class="checkbox-row">
+              <input type="checkbox" id="login-remember">
+              Remember me
+            </label>
+            <button type="button" class="auth-link" id="btn-forgot">Forgot password?</button>
+          </div>
+          <div class="auth-error hidden" id="login-error"></div>
+          <button type="submit" class="btn btn-primary btn-block" id="btn-login">
+            <span class="btn-label">Sign in</span>
+          </button>
+        </form>
+        <p class="auth-foot">
+          New to StudyFlow?
+          <button type="button" class="auth-link" id="login-to-signup">Create an account</button>
+        </p>
+      </section>
+
+      <!-- ============ SIGN UP ============ -->
+      <section class="auth-panel hidden" id="panel-signup" role="tabpanel">
+        <header class="auth-head">
+          <h1 class="auth-title">Create your account</h1>
+          <p class="auth-sub">Start planning, focusing, and tracking your study</p>
+        </header>
+        <form id="signup-form" novalidate>
+          <div class="form-field">
+            <label for="signup-name">Full name</label>
+            <input type="text" class="input" id="signup-name" autocomplete="name" placeholder="Alex Johnson" required>
+          </div>
+          <div class="form-field">
+            <label for="signup-email">Email address</label>
+            <input type="email" class="input" id="signup-email" autocomplete="email" placeholder="you@example.com" required>
+          </div>
+          <div class="grid grid-cols-2">
+            <div class="form-field">
+              <label for="signup-password">Password</label>
+              <input type="password" class="input" id="signup-password" autocomplete="new-password" placeholder="Min. 8 characters" required>
+            </div>
+            <div class="form-field">
+              <label for="signup-confirm">Confirm password</label>
+              <input type="password" class="input" id="signup-confirm" autocomplete="new-password" placeholder="Repeat password" required>
+            </div>
+          </div>
+          <div class="form-field hidden" id="legacy-row">
+            <label class="checkbox-row">
+              <input type="checkbox" id="signup-import" checked>
+              Import my existing StudyFlow data from this browser
+            </label>
+            <div class="form-hint">Existing subjects, tasks, sessions, exams, notes and focus history will be moved to your new account.</div>
+          </div>
+          <div class="form-field">
+            <div class="form-hint auth-note">A secure verification code will be sent to your email to activate your account.</div>
+          </div>
+          <div class="auth-error hidden" id="signup-error"></div>
+          <button type="submit" class="btn btn-primary btn-block" id="btn-signup">
+            <span class="btn-label">Create account</span>
+          </button>
+        </form>
+        <p class="auth-foot">
+          Already have an account?
+          <button type="button" class="auth-link" id="signup-to-login">Sign in</button>
+        </p>
+      </section>
+
+      <!-- ============ EMAIL VERIFICATION ============ -->
+      <section class="auth-panel hidden" id="panel-verify" role="tabpanel">
+        <header class="auth-head">
+          <span class="auth-ico">&#9993;&#65039;</span>
+          <h1 class="auth-title">Verify your email</h1>
+          <p class="auth-sub">We sent a 6-digit code to <strong id="verify-email">your email</strong></p>
+        </header>
+        <div class="auth-demo-code" id="verify-demo" hidden>
+          <span>Demo mode — your code is</span>
+          <code id="verify-code"></code>
+        </div>
+        <form id="verify-form" novalidate>
+          <div class="form-field">
+            <label for="verify-input">Verification code</label>
+            <input type="text" class="input input-code" id="verify-input" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="000000" required>
+          </div>
+          <div class="auth-error hidden" id="verify-error"></div>
+          <button type="submit" class="btn btn-primary btn-block" id="btn-verify">
+            <span class="btn-label">Verify &amp; continue</span>
+          </button>
+        </form>
+        <div class="auth-actions">
+          <button type="button" class="auth-link" id="btn-resend-code">Resend code</button>
+          <button type="button" class="auth-link" id="btn-skip-verify">Skip for now</button>
+        </div>
+      </section>
+
+      <!-- ============ FORGOT PASSWORD ============ -->
+      <section class="auth-panel hidden" id="panel-forgot" role="tabpanel">
+        <header class="auth-head">
+          <span class="auth-ico">&#128274;</span>
+          <h1 class="auth-title">Forgot password?</h1>
+          <p class="auth-sub">Enter your email and we'll send you a reset code</p>
+        </header>
+        <form id="forgot-form" novalidate>
+          <div class="form-field">
+            <label for="forgot-email">Email address</label>
+            <input type="email" class="input" id="forgot-email" autocomplete="email" placeholder="you@example.com" required>
+          </div>
+          <div class="auth-error hidden" id="forgot-error"></div>
+          <button type="submit" class="btn btn-primary btn-block" id="btn-forgot-send">
+            <span class="btn-label">Send reset code</span>
+          </button>
+        </form>
+        <p class="auth-foot">
+          <button type="button" class="auth-link" id="forgot-to-login">Back to sign in</button>
+        </p>
+      </section>
+
+      <!-- ============ RESET PASSWORD ============ -->
+      <section class="auth-panel hidden" id="panel-reset" role="tabpanel">
+        <header class="auth-head">
+          <span class="auth-ico">&#128273;</span>
+          <h1 class="auth-title">Set a new password</h1>
+          <p class="auth-sub">Enter the reset code and your new password</p>
+        </header>
+        <div class="auth-demo-code" id="reset-demo" hidden>
+          <span>Demo mode — your code is</span>
+          <code id="reset-code"></code>
+        </div>
+        <form id="reset-form" novalidate>
+          <div class="form-field">
+            <label for="reset-input">Reset code</label>
+            <input type="text" class="input" id="reset-input" inputmode="numeric" maxlength="6" placeholder="000000" required>
+          </div>
+          <div class="grid grid-cols-2">
+            <div class="form-field">
+              <label for="reset-password">New password</label>
+              <input type="password" class="input" id="reset-password" autocomplete="new-password" placeholder="Min. 8 characters" required>
+            </div>
+            <div class="form-field">
+              <label for="reset-confirm">Confirm password</label>
+              <input type="password" class="input" id="reset-confirm" autocomplete="new-password" placeholder="Repeat password" required>
+            </div>
+          </div>
+          <div class="auth-error hidden" id="reset-error"></div>
+          <button type="submit" class="btn btn-primary btn-block" id="btn-reset">
+            <span class="btn-label">Reset password</span>
+          </button>
+        </form>
+        <p class="auth-foot">
+          <button type="button" class="auth-link" id="reset-to-login">Back to sign in</button>
+        </p>
+      </section>
+
+    </div>
+
+    <p class="auth-legal">Protected with salted password hashing. Your data stays private on this device.</p>
+  </main>
+
+  <script src="js/auth.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/theme.js"></script>
+  <script src="js/auth-page.js"></script>
+</body>
+</html>
