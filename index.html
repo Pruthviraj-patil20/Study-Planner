@@ -436,6 +436,41 @@
           </div>
         </section>
 
+        <!-- Overall Task & Study Session Completion Progress Bar -->
+        <section class="card completion-card" aria-label="Overall completion progress">
+          <div class="completion-header">
+            <div class="completion-title-group">
+              <span class="completion-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 20V10M18 20V4M6 20v-4"/>
+                </svg>
+              </span>
+              <div>
+                <h2 class="completion-title">Overall Completion</h2>
+                <p class="completion-sub" id="completion-summary">0 of 0 items completed</p>
+              </div>
+            </div>
+            <div class="completion-metrics">
+              <span class="completion-chip" id="task-completion-chip">
+                <span class="chip-dot dot-task"></span>
+                <span id="task-completion-text">0/0 Tasks</span>
+              </span>
+              <span class="completion-chip" id="session-completion-chip">
+                <span class="chip-dot dot-session"></span>
+                <span id="session-completion-text">0/0 Sessions</span>
+              </span>
+              <span class="completion-badge" id="completion-pct-badge">0%</span>
+            </div>
+          </div>
+          <div class="completion-bar-wrap">
+            <div class="completion-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="completion-progressbar">
+              <div class="completion-progress-fill" id="completion-progress-fill" style="width: 0%;">
+                <span class="completion-glow"></span>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <section class="stats-grid" aria-label="Study statistics">
           <div class="stat-card">
             <span class="stat-icon ic-primary">

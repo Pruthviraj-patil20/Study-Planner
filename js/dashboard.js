@@ -63,10 +63,50 @@
 
     /* Tasks completed */
     const doneTasks = tasks.filter((t) => t.status === 'done').length;
+    const totalTasks = tasks.length;
     document.getElementById('stat-tasks').textContent = doneTasks;
     const pending = tasks.filter((t) => t.status !== 'done').length;
     document.getElementById('stat-tasks-trend').textContent =
       doneTasks + ' done · ' + pending + ' pending';
+
+    /* Study Sessions completed */
+    const totalSessions = sessions.length;
+    const completedSessions = sessions.filter((s) => s.completed).length;
+
+    /* Overall Tasks & Study Sessions Completion Progress Bar */
+    const totalItems = totalTasks + totalSessions;
+    const totalCompleted = doneTasks + completedSessions;
+    const completionPct = totalItems > 0 ? Math.round((totalCompleted / totalItems) * 100) : 0;
+
+    const summaryEl = document.getElementById('completion-summary');
+    const taskChipEl = document.getElementById('task-completion-text');
+    const sessionChipEl = document.getElementById('session-completion-text');
+    const badgeEl = document.getElementById('completion-pct-badge');
+    const fillEl = document.getElementById('completion-progress-fill');
+    const progressBar = document.getElementById('completion-progressbar');
+
+    if (summaryEl) {
+      summaryEl.textContent = totalItems > 0
+        ? totalCompleted + ' of ' + totalItems + ' items completed (' + completionPct + '%)'
+        : 'No tasks or sessions added yet';
+    }
+    if (taskChipEl) {
+      taskChipEl.textContent = doneTasks + '/' + totalTasks + ' Tasks';
+    }
+    if (sessionChipEl) {
+      sessionChipEl.textContent = completedSessions + '/' + totalSessions + ' Sessions';
+    }
+    if (badgeEl) {
+      badgeEl.textContent = completionPct + '%';
+    }
+    if (progressBar) {
+      progressBar.setAttribute('aria-valuenow', String(completionPct));
+    }
+    if (fillEl) {
+      requestAnimationFrame(() => {
+        fillEl.style.width = completionPct + '%';
+      });
+    }
 
     /* Streak */
     document.getElementById('stat-streak').textContent = U.currentStreak(focus, sessions);

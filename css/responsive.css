@@ -186,6 +186,34 @@
     gap: 6px;
   }
 
+  /* Completion Progress Bar Mobile */
+  .completion-card {
+    padding: 13px 14px;
+    margin-bottom: 16px;
+  }
+  .completion-header {
+    gap: 10px;
+    margin-bottom: 11px;
+  }
+  .completion-title { font-size: 14px; }
+  .completion-metrics {
+    width: 100%;
+    justify-content: space-between;
+    gap: 6px;
+  }
+  .completion-chip {
+    font-size: 11px;
+    padding: 4px 8px;
+  }
+  .completion-badge {
+    font-size: 12.5px;
+    padding: 3px 9px;
+    min-width: 44px;
+  }
+  .completion-progress-track {
+    height: 8px;
+  }
+
   /* 2-Column Balanced Mobile Stat Cards */
   .stats-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
