@@ -2,6 +2,11 @@
 
 StudyFlow is a modern, comprehensive Study Planner and Dashboard tailored for students and developers. It is built entirely using HTML, CSS, and Vanilla JavaScript, requiring zero dependencies, build steps, or backend servers to run. All data is persisted locally in your browser using `localStorage`.
 
+## 🌐 Live Demo
+
+🔗 **[https://pruthviraj-patil20.github.io/Study-Planner/](https://pruthviraj-patil20.github.io/Study-Planner/)**
+
+
 ## 🚀 Features
 
 - **Dashboard:** Get a quick glance at your study hours, completed tasks, upcoming exams, and overall progress.
