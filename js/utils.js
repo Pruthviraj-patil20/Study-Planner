@@ -184,16 +184,22 @@
 
     let streak = 0;
     let cursor = new Date();
-    for (;;) {
-      const iso = toISODate(cursor);
-      if (studiedDays.has(iso)) {
-        streak += 1;
-        cursor = addDays(cursor, -1);
-      } else if (streak === 0) {
-        cursor = addDays(cursor, -1);
-      } else {
-        break;
+    const today = toISODate(cursor);
+
+    // If today is not studied yet, start checking from yesterday.
+    // If neither today nor yesterday was studied, streak is 0.
+    if (!studiedDays.has(today)) {
+      cursor = addDays(cursor, -1);
+      const yesterday = toISODate(cursor);
+      if (!studiedDays.has(yesterday)) {
+        return 0;
       }
+    }
+
+    // Count consecutive studied days backwards
+    while (studiedDays.has(toISODate(cursor))) {
+      streak += 1;
+      cursor = addDays(cursor, -1);
     }
     return streak;
   }
