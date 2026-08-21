@@ -97,6 +97,21 @@
   function bindLogin() {
     var form = document.getElementById('login-form');
     var btn = document.getElementById('btn-login');
+    var demoBtn = document.getElementById('btn-demo-login');
+
+    if (demoBtn) {
+      demoBtn.addEventListener('click', function () {
+        setLoading('btn-demo-login', true);
+        try {
+          A.loginDemoUser(true);
+          redirectAfterAuth();
+        } catch (err) {
+          showError('login-error', 'Could not initialize demo session.');
+        } finally {
+          setLoading('btn-demo-login', false);
+        }
+      });
+    }
 
     document.getElementById('btn-forgot').addEventListener('click', function () {
       var email = document.getElementById('login-email').value.trim();

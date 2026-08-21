@@ -68,8 +68,8 @@
 
     const settings = S.getSettings();
     if (currentMode === 'classic') {
-      const focusMin = settings.focusDefault || MODES.classic.focus;
-      const breakMin = settings.breakDefault || MODES.classic.break;
+      const focusMin = Number(settings.focusDefault) || MODES.classic.focus;
+      const breakMin = Number(settings.breakDefault) || MODES.classic.break;
       return (phase === 'focus' ? focusMin : breakMin) * 60;
     }
 

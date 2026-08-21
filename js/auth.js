@@ -164,42 +164,78 @@ window.StudyFlow = window.StudyFlow || {};
   }
 
   function webCryptoAvailable() {
-    return window.crypto && window.crypto.subtle &&
+    return !!(window.crypto && window.crypto.subtle &&
       typeof window.crypto.subtle.importKey === 'function' &&
-      typeof window.crypto.subtle.deriveBits === 'function';
+      typeof window.crypto.subtle.deriveBits === 'function');
+  }
+
+  function hmacSha256(keyBytes, msgBytes) {
+    var B = 64;
+    var K = keyBytes;
+    if (K.length > B) {
+      K = sha256Bytes(K);
+    }
+    var keyPad = new Uint8Array(B);
+    keyPad.set(K);
+
+    var iPad = new Uint8Array(B);
+    var oPad = new Uint8Array(B);
+    for (var i = 0; i < B; i++) {
+      iPad[i] = keyPad[i] ^ 0x36;
+      oPad[i] = keyPad[i] ^ 0x5c;
+    }
+
+    var innerBuf = new Uint8Array(B + msgBytes.length);
+    innerBuf.set(iPad, 0);
+    innerBuf.set(msgBytes, B);
+    var innerHash = sha256Bytes(innerBuf);
+
+    var outerBuf = new Uint8Array(B + 32);
+    outerBuf.set(oPad, 0);
+    outerBuf.set(innerHash, B);
+    return sha256Bytes(outerBuf);
+  }
+
+  function pbkdf2HmacSha256(passwordStr, saltBytes, iterations) {
+    var passBytes = new TextEncoder().encode(passwordStr);
+    var saltWithIndex = new Uint8Array(saltBytes.length + 4);
+    saltWithIndex.set(saltBytes, 0);
+    saltWithIndex[saltBytes.length + 3] = 1;
+
+    var u = hmacSha256(passBytes, saltWithIndex);
+    var result = new Uint8Array(u);
+
+    for (var i = 1; i < iterations; i++) {
+      u = hmacSha256(passBytes, u);
+      for (var k = 0; k < 32; k++) {
+        result[k] ^= u[k];
+      }
+    }
+    return result;
   }
 
   /* ------------------------------------------------------------------
-     Password hashing — PBKDF2 (WebCrypto) with SHA-256 fallback
+     Password hashing — PBKDF2 with HMAC-SHA256 (WebCrypto / pure JS)
      Result: { algorithm, iterations, salt, hash } where salt/hash are base64
      ------------------------------------------------------------------ */
 
   async function deriveBits(password, saltBytes, iterations) {
     if (webCryptoAvailable()) {
-      var enc = new TextEncoder();
-      var key = await window.crypto.subtle.importKey(
-        'raw', enc.encode(password), 'PBKDF2', false, ['deriveBits']
-      );
-      var bits = await window.crypto.subtle.deriveBits(
-        { name: 'PBKDF2', salt: saltBytes, iterations: iterations, hash: 'SHA-256' },
-        key, 256
-      );
-      return new Uint8Array(bits);
+      try {
+        var enc = new TextEncoder();
+        var key = await window.crypto.subtle.importKey(
+          'raw', enc.encode(password), 'PBKDF2', false, ['deriveBits']
+        );
+        var bits = await window.crypto.subtle.deriveBits(
+          { name: 'PBKDF2', salt: saltBytes, iterations: iterations, hash: 'SHA-256' },
+          key, 256
+        );
+        return new Uint8Array(bits);
+      } catch (err) {
+        // Fall back to pure JS PBKDF2
+      }
     }
-    // Pure-JS fallback: iterated SHA-256 over salt+password
-    var seed = new Uint8Array(saltBytes.length + 2 * 64);
-    var enc2 = new TextEncoder();
-    seed.set(saltBytes, 0);
-    var passBytes = enc2.encode(password);
-    seed.set(passBytes, saltBytes.length);
-    var digest = sha256Bytes(seed.subarray(0, saltBytes.length + passBytes.length));
-    var buf = new Uint8Array(32 + passBytes.length);
-    for (var i = 0; i < iterations; i++) {
-      buf.set(digest, 0);
-      buf.set(passBytes, 32);
-      digest = sha256Bytes(buf.subarray(0, 32 + passBytes.length));
-    }
-    return digest;
+    return pbkdf2HmacSha256(password, saltBytes, Math.min(iterations, 10000));
   }
 
   async function hashPassword(password) {
@@ -208,7 +244,7 @@ window.StudyFlow = window.StudyFlow || {};
     var iterations = useWeb ? PBKDF2_ITERATIONS : FALLBACK_ITERATIONS;
     var hash = await deriveBits(password, salt, iterations);
     return {
-      algorithm: useWeb ? 'PBKDF2' : 'PBKDF2-JS',
+      algorithm: 'PBKDF2',
       iterations: iterations,
       salt: bytesToB64(salt),
       hash: bytesToB64(hash)
@@ -227,12 +263,37 @@ window.StudyFlow = window.StudyFlow || {};
   }
 
   /* ------------------------------------------------------------------
-     User registry
+     User registry & Demo account provisioning
      ------------------------------------------------------------------ */
+
+  var DEMO_USER = {
+    id: 'u_demo_alex_johnson',
+    name: 'Alex Johnson',
+    email: 'alex@studyflow.app',
+    passwordHash: {
+      algorithm: 'PBKDF2',
+      iterations: 100000,
+      salt: 'STGymsmdZ20NZg8j3Fh4iw==',
+      hash: 'tzOaaPQATDuR4K2X68INY0H2FpGnOFlWHJUx7+UPJF8='
+    },
+    avatar: null,
+    bio: 'Computer Science student focusing on Algorithms and Web Technologies.',
+    institution: 'Tech University',
+    course: 'Computer Science',
+    phone: '+1 (555) 234-5678',
+    emailVerified: true,
+    createdAt: '2026-01-15T08:00:00.000Z',
+    updatedAt: '2026-08-20T10:00:00.000Z',
+    sessions: []
+  };
 
   function loadUsers() {
     var list = loadJSON(USERS_KEY);
-    return Array.isArray(list) ? list : [];
+    if (!Array.isArray(list) || list.length === 0) {
+      list = [DEMO_USER];
+      saveJSON(USERS_KEY, list);
+    }
+    return list;
   }
   function saveUsers(list) {
     return saveJSON(USERS_KEY, list);
@@ -677,8 +738,49 @@ window.StudyFlow = window.StudyFlow || {};
      Auth guard & helpers
      ------------------------------------------------------------------ */
 
+  /* ------------------------------------------------------------------
+     Auth guard & helpers
+     ------------------------------------------------------------------ */
+
+  function loginDemoUser(remember) {
+    var users = loadUsers();
+    var user = findUserByEmail('alex@studyflow.app') || users[0] || DEMO_USER;
+    createSession(user, remember !== false);
+    if (StudyFlow.Storage && StudyFlow.Storage.seedIfNeeded) {
+      StudyFlow.Storage.seedIfNeeded();
+    }
+    return { ok: true, user: currentUser };
+  }
+
+  function loginAsGuest() {
+    var guestUser = {
+      id: 'u_guest_' + randomHex(6),
+      name: 'Guest Scholar',
+      email: 'guest.' + randomHex(4) + '@studyflow.local',
+      passwordHash: { algorithm: 'PBKDF2', iterations: 1000, salt: '', hash: '' },
+      avatar: null,
+      bio: 'Guest exploring StudyFlow.',
+      institution: 'Self-directed Learning',
+      course: 'General Studies',
+      phone: '',
+      emailVerified: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      sessions: []
+    };
+    var list = loadUsers();
+    list.push(guestUser);
+    saveUsers(list);
+    if (StudyFlow.Storage && StudyFlow.Storage.seedForUser) {
+      StudyFlow.Storage.seedForUser(guestUser.id);
+    }
+    createSession(guestUser, false);
+    return { ok: true, user: currentUser };
+  }
+
   function redirectToLogin() {
-    var page = window.location.pathname.split('/').pop() || 'index.html';
+    var rawPage = window.location.pathname.split('/').pop() || 'index.html';
+    var page = rawPage.indexOf('.html') !== -1 ? rawPage : 'index.html';
     var qs = window.location.search || '';
     var target = 'auth.html?redirect=' + encodeURIComponent(page + qs);
     if (window.location.pathname.indexOf('auth.html') !== -1) return;
@@ -700,6 +802,7 @@ window.StudyFlow = window.StudyFlow || {};
 
   StudyFlow.Auth = {
     VERIFY_EMAIL: VERIFY_EMAIL,
+    DEMO_CREDENTIALS: { email: 'alex@studyflow.app', password: 'StudyFlow123!' },
     currentUser: function () { return currentUser; },
     currentUserId: currentUserId,
     restoreSession: restoreSession,
@@ -710,6 +813,8 @@ window.StudyFlow = window.StudyFlow || {};
     revokeAllSessions: revokeAllSessions,
     signup: signup,
     login: login,
+    loginDemoUser: loginDemoUser,
+    loginAsGuest: loginAsGuest,
     verifyEmail: verifyEmail,
     pendingVerification: pendingVerification,
     resendVerification: resendVerification,

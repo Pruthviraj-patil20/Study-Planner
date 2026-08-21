@@ -174,10 +174,10 @@
 
   /* ---------- Session form ---------- */
 
-  function subjectOptions() {
+  function subjectOptions(selectedId) {
     const subjects = S.getSubjects();
     const opts = subjects.map((s) =>
-      '<option value="' + s.id + '">' + U.escapeHTML(s.name) + '</option>'
+      '<option value="' + s.id + '"' + (s.id === selectedId ? ' selected' : '') + '>' + U.escapeHTML(s.name) + '</option>'
     ).join('');
     return opts || '<option value="">No subjects — add one first</option>';
   }
@@ -196,7 +196,7 @@
         '<form id="session-form" novalidate>' +
           '<div class="form-field">' +
             '<label for="sess-subject">Subject <span class="required-mark">*</span></label>' +
-            '<select class="select" id="sess-subject" required>' + subjectOptions() + '</select>' +
+            '<select class="select" id="sess-subject" required>' + subjectOptions(subjectId) + '</select>' +
             '<div class="form-error hidden" id="sess-subject-err">Please add a subject first.</div>' +
           '</div>' +
           '<div class="form-field">' +

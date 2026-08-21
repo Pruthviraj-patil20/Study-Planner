@@ -597,10 +597,13 @@
     });
   }
 
+  StudyFlow.Modal = { openModal, closeModal, confirmDialog };
+  StudyFlow.UI = { showToast };
+
   /* ---------- Boot ---------- */
 
   document.addEventListener('DOMContentLoaded', () => {
-    const user = StudyFlow.Auth.restoreSession();
+    let user = StudyFlow.Auth.restoreSession();
     if (!user) {
       showAuthGate();
       StudyFlow.Auth.redirectToLogin();
@@ -612,8 +615,6 @@
     ensureBackgroundIllustration();
     initSidebar();
     initProfileWidget(user);
-    StudyFlow.Modal = { openModal, closeModal, confirmDialog };
-    StudyFlow.UI = { showToast };
     document.dispatchEvent(new CustomEvent('studyflow:ready'));
   });
 })();
