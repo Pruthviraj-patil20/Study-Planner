@@ -46,17 +46,12 @@ window.StudyFlow = window.StudyFlow || {};
     dailyGoal: 120,
     focusDefault: 25,
     breakDefault: 5,
-  function getDefaultAPIKey() {
-    try {
-      return atob('c2stc3ZjYWNjdC1FY2M5VnNHcmxTeG5aTVRmMDgzWlNmSFRBUVNLTkVsMnZha3ZtVnp0NmFWblU3YXFZdGRQLURyVjhPd202RjFmWU9yTWZFQ2VIVDNCbGJrRkoxWEFLMkthMUxqbEdSRGdwb0d2WENkQUpHbmZVSEJuSm1WY1JoeWlLSHBsRzl1TXRRWG5qYjAxNlFsTHAxWmpyQk1TN0FlY0Q0QQ==');
-    } catch (e) {
-      return '';
-    }
-  }
+    weekStart: 0
+  };
 
   const DEFAULT_AI_CONFIG = {
     provider: 'openai', // 'openai' | 'gemini' | 'groq' | 'custom'
-    apiKey: getDefaultAPIKey(),
+    apiKey: '',
     model: 'gpt-4o-mini',
     customEndpoint: '',
     systemInstructions: '',
@@ -142,14 +137,7 @@ window.StudyFlow = window.StudyFlow || {};
     saveData(scopedKey('settings'), merged);
     return merged;
   }
-  function getAIConfig() {
-    const loaded = loadData(scopedKey('ai_config'), {});
-    const cfg = Object.assign({}, DEFAULT_AI_CONFIG, loaded);
-    if (!cfg.apiKey || !cfg.apiKey.trim()) {
-      cfg.apiKey = getDefaultAPIKey();
-    }
-    return cfg;
-  }
+  function getAIConfig() { return Object.assign({}, DEFAULT_AI_CONFIG, loadData(scopedKey('ai_config'), {})); }
   function setAIConfig(patch) {
     const merged = Object.assign({}, getAIConfig(), patch);
     saveData(scopedKey('ai_config'), merged);

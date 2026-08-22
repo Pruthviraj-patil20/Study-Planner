@@ -377,33 +377,63 @@ window.StudyFlow = window.StudyFlow || {};
     );
   }
 
-  /* ---------- Real LLM API Dispatcher (OpenAI / Gemini / Groq / Custom) ---------- */
+  /* ---------- Real Serverless LLM API Dispatcher (/api/chat) ---------- */
 
   async function callLLM(userQuery, imageBase64, history) {
     var config = S.getAIConfig();
     var apiKey = (config.apiKey || '').trim();
-    if (apiKey) {
-      apiKey = apiKey.replace(/^sk-svcacct\s+/, 'sk-svcacct-');
+    var studentCtx = buildStudentContext();
+
+    // 1. Primary Strategy: Call the secure serverless /api/chat endpoint
+    try {
+      var serverlessHeaders = {
+        'Content-Type': 'application/json'
+      };
+      if (apiKey) {
+        serverlessHeaders['Authorization'] = 'Bearer ' + apiKey;
+      }
+
+      var serverlessRes = await fetch('/api/chat', {
+        method: 'POST',
+        headers: serverlessHeaders,
+        body: JSON.stringify({
+          query: userQuery,
+          imageBase64: imageBase64,
+          history: (history || []).slice(-10),
+          studentContext: studentCtx,
+          provider: config.provider || 'openai',
+          model: config.model || 'gpt-4o-mini'
+        })
+      });
+
+      if (serverlessRes.ok) {
+        var serverData = await serverlessRes.json();
+        if (serverData && serverData.text) {
+          return serverData.text;
+        }
+      }
+    } catch (serverErr) {
+      // Serverless endpoint not hosted locally (e.g. static file:// preview)
+      console.info('Serverless /api/chat endpoint not reachable, evaluating client fallback:', serverErr.message);
     }
 
-    // If no API key configured, use local educational inference engine
+    // 2. Client-Side Fallback: If no API key, use local educational inference engine
     if (!apiKey) {
       return localEducationalInference(userQuery, imageBase64, history);
     }
 
+    // 3. Direct Client Provider Dispatcher (Only if user supplied client-side key & serverless is unavailable)
     var provider = config.provider || 'openai';
     var systemPrompt = generateSystemPrompt();
 
-    // 1. Google Gemini API with multi-turn history
+    // 3a. Google Gemini API
     if (provider === 'gemini') {
       var model = config.model || 'gemini-1.5-flash';
       var url = 'https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(model) + ':generateContent?key=' + encodeURIComponent(apiKey);
 
       var contents = [];
-
-      // Include recent multi-turn history (last 10 turns)
       if (history && history.length > 0) {
-        var recent = history.slice(-10);
+        var recent = history.slice(-8);
         recent.forEach(function (m) {
           contents.push({
             role: m.role === 'user' ? 'user' : 'model',
@@ -425,10 +455,7 @@ window.StudyFlow = window.StudyFlow || {};
         });
       }
 
-      contents.push({
-        role: 'user',
-        parts: currentParts
-      });
+      contents.push({ role: 'user', parts: currentParts });
 
       var geminiRes = await fetch(url, {
         method: 'POST',
@@ -456,7 +483,7 @@ window.StudyFlow = window.StudyFlow || {};
       return textPart;
     }
 
-    // 2. OpenAI / Groq / Custom OpenAI-Compatible with multi-turn history
+    // 3b. OpenAI / Groq / Custom OpenAI-Compatible
     var endpoint = 'https://api.openai.com/v1/chat/completions';
     var modelName = config.model || 'gpt-4o-mini';
 
@@ -471,9 +498,8 @@ window.StudyFlow = window.StudyFlow || {};
       { role: 'system', content: systemPrompt }
     ];
 
-    // Include recent multi-turn history
     if (history && history.length > 0) {
-      var recentHistory = history.slice(-10);
+      var recentHistory = history.slice(-8);
       recentHistory.forEach(function (m) {
         messages.push({
           role: m.role === 'user' ? 'user' : 'assistant',
