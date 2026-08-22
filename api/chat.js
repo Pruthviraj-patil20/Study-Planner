@@ -49,6 +49,27 @@ CORE PEDAGOGICAL INSTRUCTIONS:
    - Use clean Markdown with bolding, bullet points, headers (###, ####), code blocks, and LaTeX math notation ($E = mc^2$ or $$x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}$$).`;
 }
 
+// Zero-dependency local environment loader
+try {
+  const fs = require('fs');
+  const path = require('path');
+  const envPath = path.join(process.cwd(), '.env');
+  if (fs.existsSync(envPath)) {
+    const lines = fs.readFileSync(envPath, 'utf8').split('\n');
+    lines.forEach(line => {
+      const match = line.match(/^\s*([\w_]+)\s*=\s*(.*)?\s*$/);
+      if (match) {
+        const key = match[1];
+        let val = (match[2] || '').trim();
+        if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
+          val = val.slice(1, -1);
+        }
+        if (!process.env[key]) process.env[key] = val;
+      }
+    });
+  }
+} catch (e) {}
+
 // Handler for Vercel / Standard Node.js Serverless Function
 async function handleChatRequest(reqBody, reqHeaders = {}) {
   const {
@@ -70,8 +91,8 @@ async function handleChatRequest(reqBody, reqHeaders = {}) {
   const userKey = authHeader.replace(/^Bearer\s+/i, '').trim();
 
   // Determine provider
-  let provider = requestedProvider || process.env.AI_PROVIDER || '';
-  if (!provider) {
+  let provider = requestedProvider || process.env.AI_PROVIDER || 'openai';
+  if (!provider || provider === 'auto') {
     if (envOpenAI || userKey.startsWith('sk-')) provider = 'openai';
     else if (envGemini || userKey.startsWith('AIza')) provider = 'gemini';
     else if (envGroq || userKey.startsWith('gsk_')) provider = 'groq';
@@ -199,7 +220,16 @@ async function handleChatRequest(reqBody, reqHeaders = {}) {
 
   if (!oaiRes.ok) {
     const err = await oaiRes.json().catch(() => ({}));
-    throw new Error(err.error?.message || `${provider.toUpperCase()} API error (${oaiRes.status})`);
+    const errMsg = err.error?.message || `${provider.toUpperCase()} API error (${oaiRes.status})`;
+    console.warn(`Upstream ${provider} error (${oaiRes.status}):`, errMsg);
+
+    // If quota exceeded or temporary outage, provide intelligent academic answer
+    if (oaiRes.status === 429 || errMsg.toLowerCase().includes('quota') || errMsg.toLowerCase().includes('rate limit')) {
+      const fallback = generateLocalFallbackResponse(query, studentContext, history);
+      fallback.note = `AI response provided by StudyFlow Academic Solver (API quota reached for ${model}).`;
+      return fallback;
+    }
+    throw new Error(errMsg);
   }
 
   const oaiData = await oaiRes.json();
