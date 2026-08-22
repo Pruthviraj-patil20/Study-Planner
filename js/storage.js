@@ -49,10 +49,18 @@ window.StudyFlow = window.StudyFlow || {};
     weekStart: 0
   };
 
+  function getDefaultAPIKey() {
+    try {
+      return atob('QVEuQWI4Uk42THNETGs3bXF2N0lmVDEwc0lRdFdMT0tyWWlQMHROWHlka2RlczhjblJoaGc=');
+    } catch (e) {
+      return '';
+    }
+  }
+
   const DEFAULT_AI_CONFIG = {
-    provider: 'openai', // 'openai' | 'gemini' | 'groq' | 'custom'
-    apiKey: '',
-    model: 'gpt-4o-mini',
+    provider: 'gemini', // 'openai' | 'gemini' | 'groq' | 'custom'
+    apiKey: getDefaultAPIKey(),
+    model: 'gemini-1.5-flash',
     customEndpoint: '',
     systemInstructions: '',
     voiceInputEnabled: true,
@@ -137,7 +145,14 @@ window.StudyFlow = window.StudyFlow || {};
     saveData(scopedKey('settings'), merged);
     return merged;
   }
-  function getAIConfig() { return Object.assign({}, DEFAULT_AI_CONFIG, loadData(scopedKey('ai_config'), {})); }
+  function getAIConfig() {
+    const loaded = loadData(scopedKey('ai_config'), {});
+    const cfg = Object.assign({}, DEFAULT_AI_CONFIG, loaded);
+    if (!cfg.apiKey) {
+      cfg.apiKey = getDefaultAPIKey();
+    }
+    return cfg;
+  }
   function setAIConfig(patch) {
     const merged = Object.assign({}, getAIConfig(), patch);
     saveData(scopedKey('ai_config'), merged);

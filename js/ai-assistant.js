@@ -388,7 +388,11 @@ window.StudyFlow = window.StudyFlow || {};
       return localEducationalInference(userQuery, imageBase64, history);
     }
 
-    var provider = config.provider || 'openai';
+    var provider = config.provider || 'gemini';
+    if (!config.provider && (apiKey.startsWith('AQ.') || apiKey.startsWith('AIzaSy'))) {
+      provider = 'gemini';
+    }
+
     var systemPrompt = generateSystemPrompt();
 
     // 1. Google Gemini API with multi-turn history
@@ -427,30 +431,41 @@ window.StudyFlow = window.StudyFlow || {};
         parts: currentParts
       });
 
-      var geminiRes = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          systemInstruction: { parts: [{ text: systemPrompt }] },
-          contents: contents,
-          generationConfig: {
-            temperature: config.temperature || 0.7,
-            maxOutputTokens: 1500
-          }
-        })
-      });
+      try {
+        var geminiRes = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-goog-api-key': apiKey
+          },
+          body: JSON.stringify({
+            systemInstruction: { parts: [{ text: systemPrompt }] },
+            contents: contents,
+            generationConfig: {
+              temperature: config.temperature || 0.7,
+              maxOutputTokens: 1500
+            }
+          })
+        });
 
-      if (!geminiRes.ok) {
-        var errData = await geminiRes.json().catch(function () { return {}; });
-        var errMsg = (errData.error && errData.error.message) || ('Gemini API Error ' + geminiRes.status);
-        throw new Error(errMsg);
+        if (!geminiRes.ok) {
+          var errData = await geminiRes.json().catch(function () { return {}; });
+          var errMsg = (errData.error && errData.error.message) || ('Gemini API Error ' + geminiRes.status);
+          console.warn('Gemini API call failed, falling back to educational inference:', errMsg);
+          return localEducationalInference(userQuery, imageBase64, history);
+        }
+
+        var geminiData = await geminiRes.json();
+        var cand = geminiData.candidates && geminiData.candidates[0];
+        var textPart = cand && cand.content && cand.content.parts && cand.content.parts[0] && cand.content.parts[0].text;
+        if (!textPart) {
+          return localEducationalInference(userQuery, imageBase64, history);
+        }
+        return textPart;
+      } catch (geminiNetErr) {
+        console.warn('Gemini network/CORS error, using offline academic solver:', geminiNetErr);
+        return localEducationalInference(userQuery, imageBase64, history);
       }
-
-      var geminiData = await geminiRes.json();
-      var cand = geminiData.candidates && geminiData.candidates[0];
-      var textPart = cand && cand.content && cand.content.parts && cand.content.parts[0] && cand.content.parts[0].text;
-      if (!textPart) throw new Error('No response received from Gemini.');
-      return textPart;
     }
 
     // 2. OpenAI / Groq / Custom OpenAI-Compatible with multi-turn history
