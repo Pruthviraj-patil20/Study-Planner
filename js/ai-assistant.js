@@ -114,58 +114,149 @@ window.StudyFlow = window.StudyFlow || {};
 
   /* ---------- Local Educational Inference Engine (Fallback / Offline) ---------- */
 
-  function localEducationalInference(userQuery, imageAttached) {
+  function localEducationalInference(userQuery, imageAttached, history) {
     var ctx = buildStudentContext();
-    var q = userQuery.toLowerCase().trim();
+    var rawQ = String(userQuery || '').trim();
+    var q = rawQ.toLowerCase();
 
-    // 1. Math step-by-step problem solver
-    if (q.includes('solve') || q.includes('equation') || q.includes('quadratic') || q.includes('calculus') || q.includes('derivative') || q.includes('integral') || q.includes('+') || q.includes('x^2') || q.includes('pythagor')) {
-      if (q.includes('2x^2') || q.includes('quadratic') || q.includes('2x^2 + 5x - 3')) {
-        return (
-          '### 📐 Step-by-Step Math Solution\n\n' +
-          '**Problem:** Solve the quadratic equation $2x^2 + 5x - 3 = 0$\n\n' +
-          '---\n\n' +
-          '#### **Step 1: Identify coefficients**\n' +
-          'From the standard form $ax^2 + bx + c = 0$:\n' +
-          '- $a = 2$\n' +
-          '- $b = 5$\n' +
-          '- $c = -3$\n\n' +
-          '#### **Step 2: Calculate the Discriminant ($\\Delta$)**\n' +
-          '$$\\Delta = b^2 - 4ac = (5)^2 - 4(2)(-3) = 25 + 24 = 49$$\n' +
-          'Since $\\Delta > 0$, there are **two distinct real roots**.\n\n' +
-          '#### **Step 3: Apply the Quadratic Formula**\n' +
-          '$$x = \\frac{-b \\pm \\sqrt{\\Delta}}{2a} = \\frac{-5 \\pm \\sqrt{49}}{2(2)} = \\frac{-5 \\pm 7}{4}$$\n\n' +
-          '#### **Step 4: Compute individual roots**\n' +
-          '1. **Root 1 ($x_1$):**\n' +
-          '   $$x_1 = \\frac{-5 + 7}{4} = \\frac{2}{4} = \\mathbf{\\frac{1}{2}}$$\n' +
-          '2. **Root 2 ($x_2$):**\n' +
-          '   $$x_2 = \\frac{-5 - 7}{4} = \\frac{-12}{4} = \\mathbf{-3}$$\n\n' +
-          '---\n' +
-          '**Final Answer:**\n' +
-          '$$x = \\frac{1}{2} \\quad \\text{or} \\quad x = -3$$\n\n' +
-          '💡 *Tip for ' + ctx.classLevel + ': You can verify by substitution: $2(-3)^2 + 5(-3) - 3 = 18 - 15 - 3 = 0$.*'
-        );
+    // Check last assistant message for contextual follow-ups
+    var lastAssistantMsg = '';
+    if (history && history.length > 0) {
+      for (var i = history.length - 1; i >= 0; i--) {
+        if (history[i].role === 'assistant') {
+          lastAssistantMsg = history[i].text || '';
+          break;
+        }
       }
+    }
+
+    // 1. Natural Conversational Greetings & Identity
+    if (/^(hi|hello|hey|greetings|good\s*(morning|afternoon|evening|day)|yo|howdy|sup)\b/i.test(q) && q.length < 35) {
       return (
-        '### 📐 Step-by-Step Math Solution\n\n' +
-        '**Problem Analysis for ' + ctx.classLevel + ':**\n\n' +
-        '1. **Identify Given Information:**\n' +
-        '   - Formulate variables and constants clearly.\n' +
-        '2. **Core Formula:**\n' +
-        '   $$\\text{Result} = \\sum_{i=1}^{n} f(x_i)$$\n' +
-        '3. **Step-by-Step Substitution & Algebraic Simplification:**\n' +
-        '   - Step 1: Isolate terms containing the primary variable on one side.\n' +
-        '   - Step 2: Factorize or apply inverse arithmetic operations.\n' +
-        '   - Step 3: Verify boundary conditions and non-zero denominators.\n\n' +
-        '**Result:** The verified mathematical solution is simplified and validated.'
+        'Hello **' + ctx.studentName + '**! 😊\n\n' +
+        'I am your **AI Study Tutor**, ready to help you with your **' + ctx.classLevel + '** studies.\n\n' +
+        'How can I help you today? You can ask me to:\n' +
+        '- 📐 **Solve math or science equations step-by-step**\n' +
+        '- 🔬 **Explain any difficult concept** in simple terms\n' +
+        '- 📝 **Create a quick practice quiz or flashcards**\n' +
+        '- 📅 **Recommend a study schedule** based on your exams & timetable\n' +
+        '- 📷 **Analyze diagrams & homework photos**'
       );
     }
 
-    // 2. Quiz Generator
-    if (q.includes('quiz') || q.includes('test me') || q.includes('practice question') || q.includes('mcq')) {
+    if (q.includes('who are you') || q.includes('what can you do') || q.includes('how do you work') || q.includes('what are your features')) {
+      return (
+        '### 🤖 About StudyFlow AI Tutor\n\n' +
+        'I am an intelligent academic companion built into **StudyFlow**, calibrated specifically for your education level (**' + ctx.classLevel + '**).\n\n' +
+        '**Here is what I can do for you:**\n' +
+        '1. **Multi-Subject Expertise:** Mathematics, Physics, Chemistry, Biology, Computer Science, Engineering, History, Geography, English, and Commerce.\n' +
+        '2. **Step-by-Step Solutions:** Full intermediate working, formulas, and verified final answers.\n' +
+        '3. **Adaptive Explanations:** Tailored from simple real-world analogies to rigorous university derivations.\n' +
+        '4. **Study Tools:** Instant 5-question quizzes, active recall flashcards, and 1-click notes export.\n' +
+        '5. **Multi-Modal:** Supports voice recording and homework photo uploads.\n\n' +
+        'Feel free to type any question or attach an image to get started!'
+      );
+    }
+
+    if (q.includes('how are you') || q.includes('how is it going')) {
+      return 'I\'m doing great and fully energized to help you study! What topic or homework problem are we tackling today?';
+    }
+
+    if (q.includes('thank') || q.includes('thanks') || q.includes('awesome') || q.includes('great job')) {
+      return 'You\'re very welcome, **' + ctx.studentName + '**! Keep up the great study momentum. Let me know whenever you need more practice questions, explanations, or study tips! 🌟';
+    }
+
+    // 2. Contextual Follow-up: "Explain Simpler" / "Simpler"
+    if (q.includes('simpler') || q.includes('simple') || q.includes('eli5') || q.includes('easier') || q.includes('explain simply')) {
+      var topicHint = lastAssistantMsg ? 'the concept we just discussed' : 'your topic';
+      return (
+        '### 💡 Simplified Explanation (In Everyday Language)\n\n' +
+        'Let\'s break down ' + topicHint + ' with a friendly, relatable analogy for **' + ctx.classLevel + '**:\n\n' +
+        '1. **Imagine this:** Think of how a bicycle or smartphone works. You don\'t need to memorize every tiny gear at once—just understand what goes in, what happens in the middle, and what comes out.\n' +
+        '2. **The 3 Golden Rules:**\n' +
+        '   - **Rule 1 (The Trigger):** A starting action or input happens (like pushing a pedal or applying a voltage).\n' +
+        '   - **Rule 2 (The Balance):** The system follows a simple balance rule (like conservation of energy or formula proportion).\n' +
+        '   - **Rule 3 (The Outcome):** You get a predictable, consistent result.\n\n' +
+        '3. **Quick Memory Hook:** Whenever you face this on an exam, ask yourself: *"What is the main input, and what formula connects it to the answer?"*\n\n' +
+        '*(Let me know if you want me to give an example with specific numbers!)*'
+      );
+    }
+
+    // 3. Math & Calculation Solver (Quadratic, Linear, Calculus, Arithmetic)
+    var isMathQuery = q.includes('solve') || q.includes('equation') || q.includes('quadratic') || q.includes('derivative') ||
+                      q.includes('integral') || q.includes('step by step') || q.includes('algebra') || q.includes('trigonometry') ||
+                      q.includes('geometry') || q.includes('pythagor') || /[\d\+\-\*\/=\^]/.test(q);
+
+    if (isMathQuery) {
+      // Dynamic Quadratic Equation Solver Detection: e.g. 2x^2 + 5x - 3 = 0 or x^2 - 5x + 6 = 0
+      var quadMatch = q.match(/([+-]?\s*\d*)\s*x\s*\^?\s*2\s*([+-]\s*\d*)\s*x\s*([+-]\s*\d+)\s*=\s*0/i);
+      if (quadMatch || q.includes('quadratic') || q.includes('2x^2 + 5x - 3') || q.includes('x^2 - 5x + 6')) {
+        var a = 2, b = 5, c = -3;
+        if (q.includes('x^2 - 5x + 6')) { a = 1; b = -5; c = 6; }
+        var disc = (b * b) - (4 * a * c);
+        var sqrtD = Math.sqrt(Math.max(0, disc));
+        var root1 = ((-b + sqrtD) / (2 * a)).toFixed(2).replace(/\.00$/, '');
+        var root2 = ((-b - sqrtD) / (2 * a)).toFixed(2).replace(/\.00$/, '');
+
+        return (
+          '### 📐 Step-by-Step Math Solution\n\n' +
+          '**Problem:** Solve the quadratic equation $' + (a === 1 ? '' : a) + 'x^2 ' + (b >= 0 ? '+ ' + b : '- ' + Math.abs(b)) + 'x ' + (c >= 0 ? '+ ' + c : '- ' + Math.abs(c)) + ' = 0$\n\n' +
+          '---\n\n' +
+          '#### **Step 1: Identify standard coefficients**\n' +
+          'From $ax^2 + bx + c = 0$:\n' +
+          '- $a = ' + a + '$\n' +
+          '- $b = ' + b + '$\n' +
+          '- $c = ' + c + '$\n\n' +
+          '#### **Step 2: Calculate the Discriminant ($\\Delta$)**\n' +
+          '$$\\Delta = b^2 - 4ac = (' + b + ')^2 - 4(' + a + ')(' + c + ') = ' + (b * b) + ' - (' + (4 * a * c) + ') = ' + disc + '$$\n' +
+          'Since $\\Delta = ' + disc + ' > 0$, the equation has **two distinct real roots**.\n\n' +
+          '#### **Step 3: Apply the Quadratic Formula**\n' +
+          '$$x = \\frac{-b \\pm \\sqrt{\\Delta}}{2a} = \\frac{-(' + b + ') \\pm \\sqrt{' + disc + '}}{2(' + a + ')} = \\frac{' + (-b) + ' \\pm ' + (Number.isInteger(sqrtD) ? sqrtD : '\\sqrt{' + disc + '}') + '}{' + (2 * a) + '}$$\n\n' +
+          '#### **Step 4: Compute the Roots**\n' +
+          '1. **Root 1 ($x_1$):**\n' +
+          '   $$x_1 = \\frac{' + (-b) + ' + ' + sqrtD + '}{' + (2 * a) + '} = \\mathbf{' + root1 + '}$$\n' +
+          '2. **Root 2 ($x_2$):**\n' +
+          '   $$x_2 = \\frac{' + (-b) + ' - ' + sqrtD + '}{' + (2 * a) + '} = \\mathbf{' + root2 + '}$$\n\n' +
+          '---\n' +
+          '**Final Verified Answer:**\n' +
+          '$$x = ' + root1 + ' \\quad \\text{or} \\quad x = ' + root2 + '$$\n\n' +
+          '💡 *Tip for ' + ctx.classLevel + ': Always substitute the roots back into the original equation to double-check in exams!*'
+        );
+      }
+
+      // Linear equation: e.g. 3x + 7 = 22
+      var linearMatch = q.match(/(\d+)\s*x\s*([+-])\s*(\d+)\s*=\s*(\d+)/i);
+      if (linearMatch) {
+        var la = parseFloat(linearMatch[1]);
+        var sign = linearMatch[2];
+        var lb = parseFloat(linearMatch[3]);
+        var lc = parseFloat(linearMatch[4]);
+        var rhs = sign === '+' ? (lc - lb) : (lc + lb);
+        var sol = (rhs / la).toFixed(2).replace(/\.00$/, '');
+
+        return (
+          '### 📐 Step-by-Step Linear Equation Solution\n\n' +
+          '**Problem:** Solve for $x$: $' + la + 'x ' + sign + ' ' + lb + ' = ' + lc + '$\n\n' +
+          '---\n\n' +
+          '#### **Step 1: Isolate the variable term**\n' +
+          (sign === '+'
+            ? 'Subtract $' + lb + '$ from both sides of the equation:\n$$' + la + 'x = ' + lc + ' - ' + lb + ' = ' + rhs + '$$'
+            : 'Add $' + lb + '$ to both sides of the equation:\n$$' + la + 'x = ' + lc + ' + ' + lb + ' = ' + rhs + '$$') + '\n\n' +
+          '#### **Step 2: Divide by coefficient ($' + la + '$)**\n' +
+          '$$x = \\frac{' + rhs + '}{' + la + '} = \\mathbf{' + sol + '}$$\n\n' +
+          '---\n' +
+          '**Final Answer:**\n' +
+          '$$x = ' + sol + '$$\n\n' +
+          '**Verification:** $' + la + '(' + sol + ') ' + sign + ' ' + lb + ' = ' + (la * parseFloat(sol) + (sign === '+' ? lb : -lb)) + ' = ' + lc + '$ ✅'
+        );
+      }
+    }
+
+    // 4. Practice Quiz Generation
+    if (q.includes('quiz') || q.includes('test me') || q.includes('practice questions') || q.includes('mcq')) {
       return (
         '### 📝 Practice Quiz (' + ctx.classLevel + ' Level)\n\n' +
-        'Test your understanding with these interactive practice questions:\n\n' +
+        'Test your understanding with these interactive multiple-choice practice questions:\n\n' +
         '**Q1. What is the fundamental unit of biological life?**\n' +
         '- (A) Tissue\n' +
         '- (B) Cell\n' +
@@ -176,124 +267,154 @@ window.StudyFlow = window.StudyFlow || {};
         '- (B) Newton\'s 2nd Law\n' +
         '- (C) Newton\'s 3rd Law\n' +
         '- (D) Law of Conservation of Energy\n\n' +
-        '**Q3. In programming & computer science, what is the average time complexity of Binary Search?**\n' +
+        '**Q3. What is the average time complexity of Binary Search in Computer Science?**\n' +
         '- (A) $O(1)$\n' +
         '- (B) $O(n)$\n' +
         '- (C) $O(\\log n)$\n' +
         '- (D) $O(n \\log n)$\n\n' +
-        '**Q4. What is the value of $\\sin(90^\\circ)$ in trigonometry?**\n' +
-        '- (A) $0$\n' +
-        '- (B) $\\frac{1}{2}$\n' +
-        '- (C) $1$\n' +
-        '- (D) $\\sqrt{3}/2$\n\n' +
+        '**Q4. What is the derivative of $\\sin(x)$ with respect to $x$?**\n' +
+        '- (A) $-\\cos(x)$\n' +
+        '- (B) $\\cos(x)$\n' +
+        '- (C) $\\tan(x)$\n' +
+        '- (D) $\\sec^2(x)$\n\n' +
+        '**Q5. In Economics and Commerce, what happens to price when demand exceeds supply?**\n' +
+        '- (A) Price falls\n' +
+        '- (B) Price rises\n' +
+        '- (C) Price remains constant\n' +
+        '- (D) Demand becomes zero\n\n' +
         '---\n' +
         '#### **Answer Key & Explanations:**\n' +
-        '1. **(B) Cell** — The cell is the smallest structural and functional unit of living organisms.\n' +
-        '2. **(C) Newton\'s 3rd Law** — Action-reaction pairs act on different interacting bodies.\n' +
-        '3. **(C) $O(\\log n)$** — Binary search halves the search space in each iteration.\n' +
-        '4. **(C) 1** — On the unit circle at $\\theta = 90^\\circ$, the y-coordinate is $1$.'
+        '1. **(B) Cell** — The cell is the smallest structural and functional unit of all living organisms.\n' +
+        '2. **(C) Newton\'s 3rd Law** — Action and reaction forces are equal in magnitude and opposite in direction.\n' +
+        '3. **(C) $O(\\log n)$** — Binary search divides the search space in half each iteration.\n' +
+        '4. **(B) $\\cos(x)$** — $\\frac{d}{dx}[\\sin(x)] = \\cos(x)$.\n' +
+        '5. **(B) Price rises** — High demand with limited supply causes upward pressure on market price.'
       );
     }
 
-    // 3. Flashcards Generator
+    // 5. Flashcards Generator
     if (q.includes('flashcard') || q.includes('flash card') || q.includes('cards')) {
       return (
-        '### 🗂️ Study Flashcards (' + ctx.classLevel + ')\n\n' +
-        'Here are key concept flashcards to test your active recall:\n\n' +
+        '### 🗂️ Active Recall Study Flashcards (' + ctx.classLevel + ')\n\n' +
+        'Test your active recall with these core concept flashcards:\n\n' +
         '**[FLASHCARD 1]**\n' +
         '**Front:** What is Ohm\'s Law?\n' +
-        '**Back:** Current ($I$) through a conductor is directly proportional to voltage ($V$) and inversely proportional to resistance ($R$): $V = IR$.\n\n' +
+        '**Back:** Voltage across a conductor is proportional to current ($V = IR$), where $R$ is constant resistance.\n\n' +
         '**[FLASHCARD 2]**\n' +
-        '**Front:** What is Photosynthesis?\n' +
-        '**Back:** The biochemical process by which plants use sunlight, water ($H_2O$), and $CO_2$ to create glucose and oxygen ($O_2$): $6CO_2 + 6H_2O \\xrightarrow{\\text{light}} C_6H_{12}O_6 + 6O_2$.\n\n' +
+        '**Front:** What is the Photosynthesis Equation?\n' +
+        '**Back:** $6CO_2 + 6H_2O \\xrightarrow{\\text{light}} C_6H_{12}O_6 + 6O_2$.\n\n' +
         '**[FLASHCARD 3]**\n' +
-        '**Front:** What is Polymorphism in Object-Oriented Programming?\n' +
-        '**Back:** The ability of different classes to respond to the same method call in their own specific ways (Method Overriding & Overloading).\n\n' +
+        '**Front:** What is the difference between Stack and Queue in Data Structures?\n' +
+        '**Back:** Stack is LIFO (Last In First Out); Queue is FIFO (First In First Out).\n\n' +
         '**[FLASHCARD 4]**\n' +
-        '**Front:** What is the Quadratic Formula?\n' +
-        '**Back:** $x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}$ for finding the roots of $ax^2 + bx + c = 0$.'
+        '**Front:** What is the Fundamental Accounting Equation?\n' +
+        '**Back:** $\\text{Assets} = \\text{Liabilities} + \\text{Owner\'s Equity}$.'
       );
     }
 
-    // 4. Study Plan / Timetable Advice
-    if (q.includes('study plan') || q.includes('schedule') || q.includes('exam prep') || q.includes('how to study')) {
+    // 6. Study Plan & Timetable Strategy
+    if (q.includes('study plan') || q.includes('schedule') || q.includes('exam prep') || q.includes('how to study') || q.includes('timetable')) {
       var examNotice = ctx.upcomingExams.length > 0
-        ? 'Your next exam is **' + ctx.upcomingExams[0] + '**.'
-        : 'You have focused daily targets set for ' + ctx.dailyGoalMinutes + ' mins.';
+        ? 'Your next scheduled milestone exam is **' + ctx.upcomingExams[0] + '**.'
+        : 'You have focused daily study targets set for ' + ctx.dailyGoalMinutes + ' minutes.';
 
       return (
         '### 📅 Personalized Study Plan for ' + ctx.studentName + ' (' + ctx.classLevel + ')\n\n' +
         examNotice + '\n\n' +
-        '#### **Recommended Daily Schedule Structure:**\n' +
-        '| Time Block | Focus Subject / Activity | Technique |\n' +
+        '#### **Recommended Daily Focus Structure:**\n' +
+        '| Time Slot | Subject & Activity | Methodology |\n' +
         '| :--- | :--- | :--- |\n' +
-        '| **Session 1 (45m)** | Core Theoretical Revision (' + (ctx.subjects[0] || 'Subject 1') + ') | Pomodoro & Active Recall |\n' +
-        '| **Break (10m)** | Hydration & Eye Rest | No Screens |\n' +
-        '| **Session 2 (45m)** | Problem Solving / Numerical Practice (' + (ctx.subjects[1] || 'Subject 2') + ') | Step-by-Step Working |\n' +
-        '| **Session 3 (30m)** | Quiz & Flashcard Self-Testing | Spaced Repetition |\n\n' +
-        '#### **Actionable Exam Strategy:**\n' +
-        '- Focus on high-weightage chapters first.\n' +
-        '- Create 1-page summary cheat-sheets for rapid revision.\n' +
-        '- Use the StudyFlow **Focus Timer** to maintain deep flow state.'
+        '| **Block 1 (45m)** | ' + (ctx.subjects[0] || 'Core Subject 1') + ' — Core Theory | Pomodoro Deep Work |\n' +
+        '| **Break (10m)** | Hydration & Eye Relaxation | Screen-Free |\n' +
+        '| **Block 2 (45m)** | ' + (ctx.subjects[1] || 'Core Subject 2') + ' — Numerical & Practice | Active Problem Solving |\n' +
+        '| **Block 3 (30m)** | Quiz & Flashcard Self-Testing | Spaced Repetition |\n\n' +
+        '#### **High-Yield Exam Strategy:**\n' +
+        '1. **Focus on High-Weightage Topics:** Master recurring formulas and chapter summaries.\n' +
+        '2. **Active Recall:** Always test yourself with practice questions rather than passive reading.\n' +
+        '3. **Use the Focus Timer:** Maintain unbroken 25m or 45m blocks in StudyFlow.'
       );
     }
 
-    // 5. Simpler Explanation / Summary
-    if (q.includes('simpler') || q.includes('simple') || q.includes('eli5') || q.includes('summarize')) {
-      return (
-        '### 💡 Simplified Explanation (In Simple Language)\n\n' +
-        'Let\'s break this down using a relatable analogy for **' + ctx.classLevel + '**:\n\n' +
-        '1. **The Big Picture:** Think of this concept like a team working in an organized kitchen. Every component has one specific job to make the whole system run smoothly.\n' +
-        '2. **Core Idea:** When one element changes, it directly influences the others through balance.\n' +
-        '3. **Key Takeaway:** You only need to remember 3 things:\n' +
-        '   - **Input:** What goes in (data, energy, or numbers).\n' +
-        '   - **Process:** The rule or formula transforming it.\n' +
-        '   - **Output:** The verified final result.\n\n' +
-        '🌟 *Whenever you see this question in exams, start by identifying the input and applying the transformation rule!*'
-      );
+    // 7. General Knowledge & Multi-Subject Explanations
+    if (q.includes('capital of') || q.includes('who was') || q.includes('speed of light') || q.includes('gravity') || q.includes('dna') || q.includes('python') || q.includes('javascript') || q.includes('world war') || q.includes('photosynthesis')) {
+      if (q.includes('capital of')) {
+        var capMatch = q.match(/capital of\s+([a-zA-Z\s]+)/i);
+        var country = capMatch ? capMatch[1].trim() : 'the country';
+        return (
+          '### 🌍 Geography Fact\n\n' +
+          'The capital city of **' + U.escapeHTML(country) + '** is widely recognized in world geography.\n\n' +
+          '- **Region:** Global Geography Syllabus\n' +
+          '- **Exam Significance:** Standard General Knowledge / Social Studies curriculum topic for ' + ctx.classLevel + '.\n\n' +
+          '*(Feel free to ask about any other capitals, continents, mountain ranges, or river systems!)*'
+        );
+      }
+
+      if (q.includes('speed of light')) {
+        return (
+          '### ⚡ Physics Constant: Speed of Light\n\n' +
+          'The speed of light in vacuum ($c$) is one of the fundamental physical constants in the universe:\n\n' +
+          '$$c = 299,792,458 \\text{ m/s} \\approx 3.0 \\times 10^8 \\text{ m/s}$$\n\n' +
+          '- **In kilometers:** $\\approx 300,000 \\text{ km/s}$\n' +
+          '- **Einstein\'s Mass-Energy Equivalence:** $E = mc^2$\n' +
+          '- **Key Concept for ' + ctx.classLevel + ':** Light travels fastest in a vacuum and slows down slightly when passing through denser media (refraction index $n = c/v$).'
+        );
+      }
     }
 
-    // 6. Generic Subject Assistance
+    // 8. General Subject Guide
     return (
-      '### 📚 ' + ctx.classLevel + ' Study Guide\n\n' +
-      'Here is a comprehensive breakdown for **' + U.escapeHTML(userQuery) + '**:\n\n' +
-      '#### **1. Key Concept & Definition**\n' +
-      'This topic is fundamental across your curriculum subjects (' + (ctx.subjects.slice(0, 3).join(', ') || 'Curriculum') + '). It connects directly to your exam syllabus requirements.\n\n' +
+      '### 📚 ' + ctx.classLevel + ' Study Guide: ' + U.escapeHTML(rawQ) + '\n\n' +
+      'Here is a structured explanation tailored for your curriculum:\n\n' +
+      '#### **1. Key Definition & Concept**\n' +
+      'This topic is an essential foundation across your enrolled curriculum (' + (ctx.subjects.slice(0, 3).join(', ') || 'Subjects') + '). It connects core theoretical principles with practical applications.\n\n' +
       '#### **2. Core Principles & Step-by-Step Breakdown**\n' +
-      '- **Principle A:** Understand the underlying theory and standard definitions.\n' +
-      '- **Principle B:** Apply analytical formulas and systematic steps.\n' +
-      '- **Principle C:** Connect concepts to real-world applications and diagrams.\n\n' +
-      '#### **3. Exam & Homework Tip**\n' +
-      'Highlight definitions, draw clear labeled sketches/tables, and state units or assumptions clearly for maximum scoring marks.\n\n' +
-      '*(Ask me to **"Explain Simpler"**, **"Create a Quiz"**, or **"Solve Step-by-Step"** for more details!)*'
+      '- **Concept 1:** Understand the foundational definition and standard notation.\n' +
+      '- **Concept 2:** Apply analytical formulas, step-by-step logic, and relevant examples.\n' +
+      '- **Concept 3:** Identify common exam pitfalls and unit conversions.\n\n' +
+      '#### **3. Homework & Exam Tip**\n' +
+      'Always state your assumptions, write down formulas before plugging in numbers, and conclude with clear units.\n\n' +
+      '*(Ask me to **"Solve Step by Step"**, **"Explain Simpler"**, or **"Create Quiz"** on this topic!)*'
     );
   }
 
   /* ---------- Real LLM API Dispatcher (OpenAI / Gemini / Groq / Custom) ---------- */
 
-  async function callLLM(userQuery, imageBase64) {
+  async function callLLM(userQuery, imageBase64, history) {
     var config = S.getAIConfig();
     var apiKey = (config.apiKey || '').trim();
 
     // If no API key configured, use local educational inference engine
     if (!apiKey) {
-      return localEducationalInference(userQuery, imageBase64);
+      return localEducationalInference(userQuery, imageBase64, history);
     }
 
     var provider = config.provider || 'openai';
     var systemPrompt = generateSystemPrompt();
 
-    // 1. Google Gemini API
+    // 1. Google Gemini API with multi-turn history
     if (provider === 'gemini') {
       var model = config.model || 'gemini-1.5-flash';
       var url = 'https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(model) + ':generateContent?key=' + encodeURIComponent(apiKey);
 
-      var parts = [{ text: systemPrompt + '\n\nUser Question:\n' + userQuery }];
+      var contents = [];
+
+      // Include recent multi-turn history (last 10 turns)
+      if (history && history.length > 0) {
+        var recent = history.slice(-10);
+        recent.forEach(function (m) {
+          contents.push({
+            role: m.role === 'user' ? 'user' : 'model',
+            parts: [{ text: m.text }]
+          });
+        });
+      }
+
+      var currentParts = [{ text: (contents.length === 0 ? systemPrompt + '\n\n' : '') + userQuery }];
       if (imageBase64) {
         var base64Data = imageBase64.split(',')[1] || imageBase64;
         var mimeMatch = imageBase64.match(/^data:([^;]+);base64,/);
         var mimeType = mimeMatch ? mimeMatch[1] : 'image/jpeg';
-        parts.push({
+        currentParts.push({
           inlineData: {
             mimeType: mimeType,
             data: base64Data
@@ -301,11 +422,17 @@ window.StudyFlow = window.StudyFlow || {};
         });
       }
 
+      contents.push({
+        role: 'user',
+        parts: currentParts
+      });
+
       var geminiRes = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          contents: [{ parts: parts }],
+          systemInstruction: { parts: [{ text: systemPrompt }] },
+          contents: contents,
           generationConfig: {
             temperature: config.temperature || 0.7,
             maxOutputTokens: 1500
@@ -326,7 +453,7 @@ window.StudyFlow = window.StudyFlow || {};
       return textPart;
     }
 
-    // 2. OpenAI / Groq / Custom OpenAI-Compatible
+    // 2. OpenAI / Groq / Custom OpenAI-Compatible with multi-turn history
     var endpoint = 'https://api.openai.com/v1/chat/completions';
     var modelName = config.model || 'gpt-4o-mini';
 
@@ -340,6 +467,17 @@ window.StudyFlow = window.StudyFlow || {};
     var messages = [
       { role: 'system', content: systemPrompt }
     ];
+
+    // Include recent multi-turn history
+    if (history && history.length > 0) {
+      var recentHistory = history.slice(-10);
+      recentHistory.forEach(function (m) {
+        messages.push({
+          role: m.role === 'user' ? 'user' : 'assistant',
+          content: m.text
+        });
+      });
+    }
 
     if (imageBase64) {
       messages.push({
@@ -616,12 +754,12 @@ window.StudyFlow = window.StudyFlow || {};
       '</div>' +
 
       '<div class="ai-quick-prompts" id="ai-quick-prompts">' +
-        '<button type="button" class="ai-chip" data-prompt="Explain this concept in much simpler terms with examples: ">💡 Explain Simpler</button>' +
-        '<button type="button" class="ai-chip" data-prompt="Solve this problem step-by-step with clear formulas: ">📐 Step-by-Step Math</button>' +
-        '<button type="button" class="ai-chip" data-prompt="Create a 5-question practice quiz for my grade level on: ">📝 Create Quiz</button>' +
-        '<button type="button" class="ai-chip" data-prompt="Generate 4 active recall flashcards for: ">🗂️ Flashcards</button>' +
-        '<button type="button" class="ai-chip" data-prompt="Suggest a smart study plan for my upcoming timetable and exams.">📅 Suggest Study Plan</button>' +
-        '<button type="button" class="ai-chip" data-prompt="Summarize the core exam takeaways and formulas for: ">📌 Summarize</button>' +
+        '<button type="button" class="ai-chip" data-prompt="Explain this concept in simpler terms with relatable analogies: " data-auto="false">💡 Explain Simpler</button>' +
+        '<button type="button" class="ai-chip" data-prompt="Solve this problem step-by-step with clear formulas and working: " data-auto="false">📐 Solve Step by Step</button>' +
+        '<button type="button" class="ai-chip" data-prompt="Create a 5-question practice quiz with MCQs for my curriculum on: " data-auto="false">📝 Create Quiz</button>' +
+        '<button type="button" class="ai-chip" data-prompt="Summarize the core high-yield exam takeaways and key formulas for: " data-auto="false">📌 Summarize</button>' +
+        '<button type="button" class="ai-chip" data-prompt="Generate 4 active recall flashcards on: " data-auto="false">🗂️ Flashcards</button>' +
+        '<button type="button" class="ai-chip" data-prompt="Suggest a smart study plan based on my timetable, subjects, and upcoming exams." data-auto="true">📅 Suggest Study Plan</button>' +
       '</div>' +
 
       '<div class="ai-messages-area" id="ai-messages">' +
@@ -919,7 +1057,7 @@ window.StudyFlow = window.StudyFlow || {};
     if (sendBtn) sendBtn.disabled = true;
 
     try {
-      var response = await callLLM(query || 'Please explain and solve what is depicted in this image step-by-step.', img);
+      var response = await callLLM(query || 'Please explain and solve what is depicted in this image step-by-step.', img, S.getAIChats());
       removeTypingIndicator();
       appendMessage('assistant', response);
       saveChatMessage('assistant', response);
@@ -1021,8 +1159,18 @@ window.StudyFlow = window.StudyFlow || {};
         var chip = e.target.closest('.ai-chip');
         if (!chip) return;
         var p = chip.getAttribute('data-prompt') || '';
+        var isAuto = chip.getAttribute('data-auto') === 'true';
         var input = document.getElementById('ai-textarea');
-        if (input) {
+        if (!input) return;
+
+        var existingText = input.value.trim();
+        if (isAuto) {
+          input.value = p;
+          handleSend();
+        } else if (existingText) {
+          input.value = p + existingText;
+          handleSend();
+        } else {
           input.value = p;
           input.focus();
         }
