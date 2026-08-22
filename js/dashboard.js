@@ -16,10 +16,32 @@
     const focus = S.getFocusSessions();
 
     /* Welcome */
+    const user = StudyFlow.Auth ? StudyFlow.Auth.currentUser() : null;
+    const userName = user && user.name ? user.name.split(' ')[0] : '';
     document.getElementById('welcome-greeting').textContent =
-      U.greeting() + ', welcome back!';
+      U.greeting() + (userName ? ', ' + userName : '') + '!';
     document.getElementById('welcome-date').textContent =
       new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+
+    const classBadge = document.getElementById('welcome-class-badge');
+    const changeLink = document.getElementById('welcome-change-class');
+
+    if (user && user.selectedClass) {
+      const preset = window.StudyFlow.ClassPresets
+        ? window.StudyFlow.ClassPresets.getPreset(user.selectedClass)
+        : null;
+      const label = preset ? preset.name : user.selectedClass;
+      if (classBadge) {
+        classBadge.textContent = label;
+        classBadge.style.display = 'inline-flex';
+      }
+      if (changeLink) {
+        changeLink.style.display = 'inline-flex';
+      }
+    } else {
+      if (classBadge) classBadge.style.display = 'none';
+      if (changeLink) changeLink.style.display = 'none';
+    }
 
     /* Study hours this week */
     const settings = S.getSettings();

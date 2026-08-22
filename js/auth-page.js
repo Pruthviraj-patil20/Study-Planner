@@ -49,11 +49,22 @@
   }
 
   function redirectAfterAuth() {
+    var user = A.currentUser() || A.restoreSession();
     var params = new URLSearchParams(window.location.search);
     var target = params.get('redirect') || 'index.html';
     try { target = decodeURIComponent(target); } catch (e) { target = 'index.html'; }
     // Prevent open-redirect / protocol injection.
     if (/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(target) || target.indexOf('//') === 0) target = 'index.html';
+
+    if (user && !A.isOnboarded(user)) {
+      var onbUrl = 'onboarding.html';
+      if (target && target !== 'index.html' && target !== 'onboarding.html') {
+        onbUrl += '?redirect=' + encodeURIComponent(target);
+      }
+      window.location.replace(onbUrl);
+      return;
+    }
+
     window.location.replace(target);
   }
 

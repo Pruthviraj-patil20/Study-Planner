@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Select your class and education level to customize your StudyFlow workspace.">
+  <title>Select Your Class · StudyFlow</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/onboarding.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body data-page="onboarding">
+
+  <!-- Ambient background -->
+  <div class="study-bg-layer" aria-hidden="true">
+    <svg class="study-bg-svg" viewBox="0 0 1600 1000" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" style="position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:0;">
+      <defs>
+        <linearGradient id="onb-grad-1" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#6366f1" stop-opacity="0.25" />
+          <stop offset="100%" stop-color="#a855f7" stop-opacity="0.12" />
+        </linearGradient>
+        <filter id="onb-blur"><feGaussianBlur stdDeviation="90" /></filter>
+      </defs>
+      <g filter="url(#onb-blur)">
+        <circle cx="280" cy="180" r="180" fill="#e0e7ff" fill-opacity="0.5" />
+        <circle cx="1380" cy="220" r="220" fill="#ede9fe" fill-opacity="0.5" />
+        <circle cx="920" cy="800" r="200" fill="#e0f2fe" fill-opacity="0.4" />
+        <circle cx="1480" cy="820" r="180" fill="#fdf2f8" fill-opacity="0.35" />
+      </g>
+    </svg>
+  </div>
+
+  <main class="onboarding-shell">
+
+    <!-- Header Section -->
+    <header class="onboarding-header">
+      <div class="onboarding-brand">
+        <a href="index.html" class="brand">
+          <span class="brand-logo">SF</span>
+          <span class="brand-name">StudyFlow</span>
+        </a>
+      </div>
+      <div>
+        <span class="onboarding-badge" id="onboarding-mode-badge">🎯 Personalized Setup</span>
+      </div>
+      <h1 class="onboarding-title">Select Your Class &amp; Education Level</h1>
+      <p class="onboarding-sub">
+        Choose your class to automatically generate tailored subjects, chapters, study goals, timetable schedules, and exams for your planner.
+      </p>
+    </header>
+
+    <!-- Controls / Filters -->
+    <section class="onboarding-controls" aria-label="Class Categories and Search">
+      <div class="onboarding-categories" id="cat-filters" role="tablist">
+        <button type="button" class="cat-pill active" data-cat="all" role="tab" aria-selected="true">All Classes (20)</button>
+        <button type="button" class="cat-pill" data-cat="early" role="tab" aria-selected="false">Early Childhood</button>
+        <button type="button" class="cat-pill" data-cat="primary" role="tab" aria-selected="false">Primary (1–5)</button>
+        <button type="button" class="cat-pill" data-cat="middle" role="tab" aria-selected="false">Middle (6–8)</button>
+        <button type="button" class="cat-pill" data-cat="secondary" role="tab" aria-selected="false">High School (9–10)</button>
+        <button type="button" class="cat-pill" data-cat="senior" role="tab" aria-selected="false">Senior Sec (11–12)</button>
+        <button type="button" class="cat-pill" data-cat="higher" role="tab" aria-selected="false">College &amp; Higher Ed</button>
+      </div>
+      <div class="onboarding-search-wrap">
+        <span class="onboarding-search-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </span>
+        <input type="text" class="input onboarding-search" id="class-search" placeholder="Search class or level…" aria-label="Search classes">
+      </div>
+    </section>
+
+    <!-- Main Grid & Live Preview Layout -->
+    <div class="onboarding-layout" id="onboarding-layout">
+
+      <!-- Class Cards Grid -->
+      <section class="class-grid" id="class-grid" aria-label="Available classes">
+        <!-- Dynamically rendered class cards -->
+      </section>
+
+      <!-- Sticky Preview Drawer -->
+      <aside class="onboarding-preview" id="preview-drawer" aria-label="Selected class preview">
+        <div class="preview-head">
+          <div class="preview-icon-box" id="preview-icon-box">
+            <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+          </div>
+          <div class="preview-title-group">
+            <h3 id="preview-title">Class 10</h3>
+            <p id="preview-category">High School · Board Exam Track</p>
+          </div>
+        </div>
+
+        <p class="text-sm" id="preview-desc" style="color:var(--text-secondary);line-height:1.45;margin:0">
+          CBSE / ICSE curriculum: Quadratic equations, trigonometry, electricity, life processes, and modern world.
+        </p>
+
+        <!-- Custom course specification if 'Other' is chosen -->
+        <div class="custom-class-field hidden" id="custom-name-wrap">
+          <label for="custom-class-name" style="font-size:12.5px;font-weight:600;display:block;margin-bottom:4px">Custom Course / Stream Title</label>
+          <input type="text" class="input" id="custom-class-name" placeholder="e.g. UPSC CSE / Data Science Bootcamp">
+        </div>
+
+        <!-- Default Subjects Included -->
+        <div>
+          <div class="preview-section-title">
+            <span>Default Subjects Included</span>
+            <span id="preview-subj-total">6 Subjects</span>
+          </div>
+          <div class="preview-subjects-list" id="preview-subjects-list">
+            <!-- Dynamically populated subjects -->
+          </div>
+        </div>
+
+        <!-- Recommended Structure Summary -->
+        <div>
+          <div class="preview-section-title">
+            <span>Recommended Structure</span>
+          </div>
+          <div class="preview-structure-grid">
+            <div class="preview-stat-card">
+              <span class="preview-stat-label">Daily Study Goal</span>
+              <span class="preview-stat-val" id="preview-goal">180 mins</span>
+            </div>
+            <div class="preview-stat-card">
+              <span class="preview-stat-label">Focus Interval</span>
+              <span class="preview-stat-val" id="preview-focus">45 mins</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <button type="button" class="btn btn-primary btn-block onboarding-btn-confirm" id="btn-confirm-class">
+          <span class="btn-label">Set Up Planner &amp; Enter Dashboard →</span>
+        </button>
+
+        <div class="onboarding-cancel-link hidden" id="cancel-change-wrap">
+          <button type="button" class="auth-link" id="btn-cancel-change">Keep existing class &amp; return</button>
+        </div>
+      </aside>
+
+    </div>
+
+  </main>
+
+  <script src="js/class-presets.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/theme.js"></script>
+  <script src="js/onboarding.js"></script>
+</body>
+</html>

@@ -555,9 +555,15 @@
       menuAvatarEl.src = src;
       menuAvatarEl.alt = u.name + ' avatar';
       nameEl.textContent = u.name;
-      emailEl.textContent = u.email;
+
+      const preset = window.StudyFlow.ClassPresets && u.selectedClass
+        ? window.StudyFlow.ClassPresets.getPreset(u.selectedClass)
+        : null;
+      const classLabel = preset ? preset.name : (u.selectedClass || '');
+
+      emailEl.textContent = classLabel ? classLabel + ' · ' + u.email : u.email;
       menuNameEl.textContent = u.name;
-      menuEmailEl.textContent = u.email;
+      menuEmailEl.innerHTML = (classLabel ? '<span class="badge badge-info" style="font-size:11px;padding:2px 7px;margin-bottom:3px;display:inline-block">' + StudyFlow.Utils.escapeHTML(classLabel) + '</span><br>' : '') + StudyFlow.Utils.escapeHTML(u.email);
     }
     refresh();
 
@@ -608,6 +614,16 @@
       showAuthGate();
       StudyFlow.Auth.redirectToLogin();
       return;
+    }
+
+    // Check mandatory onboarding for non-onboarded users
+    if (!StudyFlow.Auth.isOnboarded(user)) {
+      const p = window.location.pathname;
+      if (p.indexOf('onboarding.html') === -1 && p.indexOf('auth.html') === -1) {
+        showAuthGate();
+        StudyFlow.Auth.redirectToOnboarding();
+        return;
+      }
     }
 
     StudyFlow.Storage.seedIfNeeded();

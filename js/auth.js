@@ -281,6 +281,8 @@ window.StudyFlow = window.StudyFlow || {};
     institution: 'Tech University',
     course: 'Computer Science',
     phone: '+1 (555) 234-5678',
+    selectedClass: 'engineering',
+    classSelected: true,
     emailVerified: true,
     createdAt: '2026-01-15T08:00:00.000Z',
     updatedAt: '2026-08-20T10:00:00.000Z',
@@ -588,6 +590,8 @@ window.StudyFlow = window.StudyFlow || {};
       institution: '',
       course: '',
       phone: '',
+      selectedClass: input.selectedClass || '',
+      classSelected: !!input.selectedClass,
       emailVerified: !VERIFY_EMAIL,
       createdAt: now,
       updatedAt: now,
@@ -657,9 +661,12 @@ window.StudyFlow = window.StudyFlow || {};
         if (VERIFY_EMAIL) createPendingVerification(user);
       }
     }
-    ['avatar', 'bio', 'institution', 'course', 'phone'].forEach(function (field) {
+    ['avatar', 'bio', 'institution', 'course', 'phone', 'selectedClass'].forEach(function (field) {
       if (field in patch) user[field] = patch[field] === undefined ? '' : patch[field];
     });
+    if ('classSelected' in patch) {
+      user.classSelected = !!patch.classSelected;
+    }
 
     user.updatedAt = new Date().toISOString();
     var list = loadUsers();
@@ -668,6 +675,34 @@ window.StudyFlow = window.StudyFlow || {};
     saveUsers(list);
     currentUser = user;
     return { ok: true, user: user, needsVerification: !!user._needsReverify, reverifyEmail: user.email };
+  }
+
+  function setSelectedClass(classKey, reseedPlanner) {
+    var user = findUserById(currentUserId());
+    if (!user) return { ok: false, error: 'Not authenticated.' };
+
+    user.selectedClass = classKey;
+    user.classSelected = true;
+    user.updatedAt = new Date().toISOString();
+
+    var list = loadUsers();
+    var idx = list.findIndex(function (u) { return u.id === user.id; });
+    if (idx !== -1) {
+      list[idx] = user;
+      saveUsers(list);
+    }
+    currentUser = user;
+
+    if (reseedPlanner !== false && StudyFlow.Storage && StudyFlow.Storage.seedForClass) {
+      StudyFlow.Storage.seedForClass(user.id, classKey);
+    }
+
+    return { ok: true, user: user };
+  }
+
+  function isOnboarded(user) {
+    user = user || currentUser || restoreSession();
+    return !!(user && user.classSelected && user.selectedClass);
   }
 
   async function changePassword(currentPassword, newPassword) {
@@ -738,13 +773,13 @@ window.StudyFlow = window.StudyFlow || {};
      Auth guard & helpers
      ------------------------------------------------------------------ */
 
-  /* ------------------------------------------------------------------
-     Auth guard & helpers
-     ------------------------------------------------------------------ */
-
   function loginDemoUser(remember) {
     var users = loadUsers();
     var user = findUserByEmail('alex@studyflow.app') || users[0] || DEMO_USER;
+    if (!user.selectedClass) {
+      user.selectedClass = 'engineering';
+      user.classSelected = true;
+    }
     createSession(user, remember !== false);
     if (StudyFlow.Storage && StudyFlow.Storage.seedIfNeeded) {
       StudyFlow.Storage.seedIfNeeded();
@@ -763,6 +798,8 @@ window.StudyFlow = window.StudyFlow || {};
       institution: 'Self-directed Learning',
       course: 'General Studies',
       phone: '',
+      selectedClass: '',
+      classSelected: false,
       emailVerified: true,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -771,9 +808,6 @@ window.StudyFlow = window.StudyFlow || {};
     var list = loadUsers();
     list.push(guestUser);
     saveUsers(list);
-    if (StudyFlow.Storage && StudyFlow.Storage.seedForUser) {
-      StudyFlow.Storage.seedForUser(guestUser.id);
-    }
     createSession(guestUser, false);
     return { ok: true, user: currentUser };
   }
@@ -787,12 +821,37 @@ window.StudyFlow = window.StudyFlow || {};
     window.location.replace(target);
   }
 
-  function requireAuth() {
+  function redirectToOnboarding(redirectUrl) {
+    var rawPage = window.location.pathname.split('/').pop() || 'index.html';
+    var page = rawPage.indexOf('.html') !== -1 ? rawPage : 'index.html';
+    var qs = window.location.search || '';
+    var target = 'onboarding.html';
+    if (redirectUrl) {
+      target += '?redirect=' + encodeURIComponent(redirectUrl);
+    } else if (page !== 'index.html' && page !== 'onboarding.html') {
+      target += '?redirect=' + encodeURIComponent(page + qs);
+    }
+    if (window.location.pathname.indexOf('onboarding.html') !== -1) return;
+    window.location.replace(target);
+  }
+
+  function requireAuth(options) {
     var user = restoreSession();
     if (!user) {
       redirectToLogin();
       return null;
     }
+
+    var skipOnboardingCheck = options && options.allowUnonboarded;
+    var pathname = window.location.pathname;
+    var isAuthPage = pathname.indexOf('auth.html') !== -1;
+    var isOnboardingPage = pathname.indexOf('onboarding.html') !== -1;
+
+    if (!skipOnboardingCheck && !isOnboarded(user) && !isAuthPage && !isOnboardingPage) {
+      redirectToOnboarding();
+      return user;
+    }
+
     return user;
   }
 
@@ -809,6 +868,9 @@ window.StudyFlow = window.StudyFlow || {};
     currentSessionRecord: currentSessionRecord,
     requireAuth: requireAuth,
     redirectToLogin: redirectToLogin,
+    redirectToOnboarding: redirectToOnboarding,
+    isOnboarded: isOnboarded,
+    setSelectedClass: setSelectedClass,
     logout: logout,
     revokeAllSessions: revokeAllSessions,
     signup: signup,

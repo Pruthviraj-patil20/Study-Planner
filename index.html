@@ -413,8 +413,12 @@
       <main class="content">
         <section class="welcome">
           <div class="welcome-text">
-            <h2 id="welcome-greeting">Welcome back</h2>
-            <p id="welcome-date"></p>
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:4px;">
+              <h2 id="welcome-greeting" style="margin:0;">Welcome back</h2>
+              <span class="badge badge-info" id="welcome-class-badge" style="font-size:12px;padding:3px 10px;font-weight:700;display:none;"></span>
+              <a href="onboarding.html?from=dashboard" id="welcome-change-class" class="auth-link" style="font-size:12px;font-weight:600;display:none;">Change</a>
+            </div>
+            <p id="welcome-date" style="margin:0;"></p>
           </div>
           <div class="welcome-actions row-wrap">
             <a href="planner.html" class="btn btn-soft btn-sm">
@@ -593,6 +597,7 @@
     </div>
   </div>
 
+  <script src="js/class-presets.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/storage.js"></script>
   <script src="js/utils.js"></script>

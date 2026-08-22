@@ -151,6 +151,52 @@
     });
   }
 
+  /* ---------- Academic Level & Curriculum ---------- */
+
+  function loadClassInfo() {
+    const user = StudyFlow.Auth ? StudyFlow.Auth.currentUser() : null;
+    const nameEl = document.getElementById('settings-class-name');
+    const descEl = document.getElementById('settings-class-desc');
+    if (!nameEl || !descEl) return;
+
+    if (user && user.selectedClass && window.StudyFlow.ClassPresets) {
+      const preset = window.StudyFlow.ClassPresets.getPreset(user.selectedClass);
+      if (preset) {
+        nameEl.textContent = preset.name;
+        descEl.textContent = preset.category + ' · ' + (preset.badge || 'Standard Track') + ' (' + (preset.subjects || []).length + ' Recommended Subjects)';
+        return;
+      }
+    }
+    nameEl.textContent = (user && user.selectedClass) || 'Class 10';
+    descEl.textContent = 'Curriculum and subject track';
+  }
+
+  function bindClassSection() {
+    const reseedBtn = document.getElementById('btn-reseed-class');
+    if (!reseedBtn) return;
+
+    reseedBtn.addEventListener('click', async () => {
+      const user = StudyFlow.Auth ? StudyFlow.Auth.currentUser() : null;
+      const classKey = (user && user.selectedClass) || 'class-10';
+      const preset = window.StudyFlow.ClassPresets
+        ? window.StudyFlow.ClassPresets.getPreset(classKey)
+        : { name: classKey };
+
+      const confirmed = await StudyFlow.Modal.confirmDialog({
+        title: 'Reload ' + preset.name + ' Subjects?',
+        message: 'This will reset your planner with default subjects, chapters, timetable sessions, and sample tasks for ' + preset.name + '. Continue?',
+        confirmText: 'Reload Subjects',
+        danger: false
+      });
+
+      if (confirmed) {
+        S.seedForClass(user ? user.id : null, classKey);
+        loadPreferences();
+        StudyFlow.UI.showToast('Subjects and study timetable reloaded for ' + preset.name + '.', 'success');
+      }
+    });
+  }
+
   /* ---------- Danger Zone / Reset All Data ---------- */
 
   function bindDangerZone() {
@@ -169,6 +215,7 @@
         S.clearAllData();
         S.seedIfNeeded();
         loadPreferences();
+        loadClassInfo();
         syncThemeButtons();
         StudyFlow.UI.showToast('All data has been reset to default.', 'info');
       }
@@ -182,6 +229,8 @@
     bindAppearance();
     loadPreferences();
     bindPreferences();
+    loadClassInfo();
+    bindClassSection();
     bindDangerZone();
   }
 

@@ -250,6 +250,156 @@ window.StudyFlow = window.StudyFlow || {};
     return { subjects, tasks, sessions, exams, notes, focus };
   }
 
+  /* ---------- Class-specific seed generator ---------- */
+
+  function buildClassSeedData(classKey) {
+    if (!window.StudyFlow || !window.StudyFlow.ClassPresets) {
+      return buildSeedData();
+    }
+    const preset = window.StudyFlow.ClassPresets.getPreset(classKey);
+    if (!preset) return buildSeedData();
+
+    const now = Date.now();
+    const id = (p) => p + '_' + now.toString(36) + Math.random().toString(36).slice(2, 7);
+
+    // 1. Build Subjects
+    const subjects = (preset.subjects || []).map((s) => {
+      const chapterList = s.chapters || ['Chapter 1', 'Chapter 2', 'Chapter 3'];
+      return {
+        id: id('subj'),
+        name: s.name,
+        color: s.color || '#6366f1',
+        icon: s.icon || 'book',
+        target: s.target || 80,
+        createdAt: isoWithOffset(-20, 9, 0),
+        chapters: chapterList.map((chName, i) => ({
+          id: id('chap'),
+          name: chName,
+          completed: i < Math.floor(chapterList.length * 0.4)
+        }))
+      };
+    });
+
+    const getSubjectId = (idx, fallbackName) => {
+      if (typeof idx === 'number' && subjects[idx]) return subjects[idx].id;
+      if (fallbackName) {
+        const match = subjects.find((s) => s.name.toLowerCase().includes(String(fallbackName).toLowerCase()));
+        if (match) return match.id;
+      }
+      return subjects[0] ? subjects[0].id : '';
+    };
+
+    // 2. Build Tasks
+    const tasks = (preset.tasks || []).map((t, idx) => ({
+      id: id('task'),
+      title: t.title,
+      description: t.description || '',
+      subjectId: getSubjectId(t.subjectIndex ?? (idx % subjects.length)),
+      category: t.category || 'Homework',
+      priority: t.priority || 'Medium',
+      deadline: isoDaysFromNow(t.daysOffset !== undefined ? t.daysOffset : 2),
+      status: idx === 0 ? 'in-progress' : (idx === (preset.tasks.length - 1) ? 'done' : 'todo'),
+      completedAt: idx === (preset.tasks.length - 1) ? isoWithOffset(-1, 18, 0) : null,
+      createdAt: isoWithOffset(-3, 10, 0)
+    }));
+
+    // 3. Build Study Sessions
+    const sessions = (preset.sessions || []).map((sess, idx) => ({
+      id: id('sess'),
+      subjectId: getSubjectId(sess.subjectIndex ?? (idx % subjects.length)),
+      topic: sess.topic || 'Core concept revision',
+      date: isoDaysFromNow(sess.dayOffset || 0),
+      startTime: pad2(sess.startH || 9) + ':' + pad2(sess.startM || 0),
+      endTime: pad2(sess.endH || 10) + ':' + pad2(sess.endM || 0),
+      duration: ((sess.endH || 10) * 60 + (sess.endM || 0)) - ((sess.startH || 9) * 60 + (sess.startM || 0)),
+      priority: sess.priority || 'Medium',
+      notes: '',
+      completed: !!sess.completed,
+      createdAt: isoWithOffset(-5, 8, 0)
+    }));
+
+    // 4. Build Exams
+    const exams = (preset.exams || []).map((ex, idx) => {
+      const sId = getSubjectId(ex.subjectIndex ?? (idx % subjects.length));
+      const subj = subjects.find((s) => s.id === sId);
+      const chaps = subj && subj.chapters ? subj.chapters.slice(0, 3).map((c) => c.name) : ['Unit 1', 'Unit 2'];
+      return {
+        id: id('exam'),
+        name: ex.name,
+        subjectId: sId,
+        date: isoDaysFromNow(ex.daysOffset || 10),
+        description: ex.description || 'Covers comprehensive syllabus chapters.',
+        topics: chaps.map((tName, tIdx) => ({
+          id: id('tp'),
+          name: tName,
+          done: tIdx === 0
+        })),
+        createdAt: isoWithOffset(-8, 9, 0)
+      };
+    });
+
+    // 5. Build Notes
+    const notes = (preset.notes || []).map((n, idx) => ({
+      id: id('note'),
+      title: n.title,
+      subjectId: getSubjectId(n.subjectIndex ?? (idx % subjects.length)),
+      content: n.content,
+      pinned: !!n.pinned,
+      createdAt: isoWithOffset(-4, 10, 0),
+      updatedAt: isoWithOffset(-1, 14, 0)
+    }));
+
+    // 6. Build Focus History
+    const focus = [];
+    if (subjects.length > 0) {
+      const focusDur = preset.focusDefault || 30;
+      const history = [
+        { d: 0, sIdx: 0, dur: focusDur },
+        { d: 0, sIdx: Math.min(1, subjects.length - 1), dur: focusDur },
+        { d: -1, sIdx: 0, dur: focusDur },
+        { d: -2, sIdx: Math.min(2, subjects.length - 1), dur: focusDur },
+        { d: -3, sIdx: Math.min(1, subjects.length - 1), dur: focusDur }
+      ];
+      history.forEach((h) => {
+        focus.push({
+          id: id('fs'),
+          subjectId: getSubjectId(h.sIdx),
+          mode: 'classic',
+          duration: h.dur,
+          completed: true,
+          date: isoDaysFromNow(h.d),
+          startedAt: isoWithOffset(h.d, 9, 0),
+          endedAt: isoWithOffset(h.d, 9 + Math.floor(h.dur / 60), h.dur % 60)
+        });
+      });
+    }
+
+    const settings = Object.assign({}, DEFAULT_SETTINGS, {
+      dailyGoal: preset.dailyGoal || DEFAULT_SETTINGS.dailyGoal,
+      focusDefault: preset.focusDefault || DEFAULT_SETTINGS.focusDefault,
+      breakDefault: preset.breakDefault || DEFAULT_SETTINGS.breakDefault
+    });
+
+    return { subjects, tasks, sessions, exams, notes, focus, settings };
+  }
+
+  function seedForClass(uid, classKey) {
+    uid = uid || currentUserId();
+    if (!uid) return false;
+    const data = buildClassSeedData(classKey);
+    saveData(scopedKey('subjects', uid), data.subjects);
+    saveData(scopedKey('tasks', uid), data.tasks);
+    saveData(scopedKey('sessions', uid), data.sessions);
+    saveData(scopedKey('exams', uid), data.exams);
+    saveData(scopedKey('notes', uid), data.notes);
+    saveData(scopedKey('focus', uid), data.focus);
+    if (data.settings) {
+      saveData(scopedKey('settings', uid), data.settings);
+    }
+    saveData(scopedKey('seeded', uid), true);
+    return true;
+  }
+
   function seedForUser(uid, options) {
     uid = uid || currentUserId();
     if (!uid) return false;
@@ -258,6 +408,13 @@ window.StudyFlow = window.StudyFlow || {};
     if (importLegacy && migrateLegacy(uid)) {
       saveData(scopedKey('seeded', uid), true);
       return true;
+    }
+
+    const user = StudyFlow.Auth ? StudyFlow.Auth.currentUser() : null;
+    const classKey = (options && options.classKey) || (user && user.selectedClass) || 'class-10';
+
+    if (window.StudyFlow && window.StudyFlow.ClassPresets) {
+      return seedForClass(uid, classKey);
     }
 
     const data = buildSeedData();
@@ -337,6 +494,8 @@ window.StudyFlow = window.StudyFlow || {};
     setSettings,
     seedIfNeeded,
     seedForUser,
+    seedForClass,
+    buildClassSeedData,
     hasLegacyData,
     migrateLegacy,
     clearUserData

@@ -65,6 +65,12 @@
     document.getElementById('profile-institution').value = user.institution || '';
     document.getElementById('profile-course').value = user.course || '';
     document.getElementById('profile-phone').value = user.phone || '';
+
+    var classSelect = document.getElementById('profile-class');
+    if (classSelect && user.selectedClass) {
+      classSelect.value = user.selectedClass;
+    }
+
     document.getElementById('email-hint').textContent = user.emailVerified
       ? ''
       : 'Changing your email will require reverification.';
@@ -129,37 +135,95 @@
 
   /* ---------- Save personal info ---------- */
 
+  function applyProfileSave(patch, reseedClass) {
+    var res = A.updateProfile(patch);
+    if (!res.ok) return showError('profile-error', res.error);
+
+    if (reseedClass && patch.selectedClass && S && S.seedForClass) {
+      S.seedForClass(res.user.id, patch.selectedClass);
+    }
+
+    pendingAvatar = null;
+    var user = res.user;
+    refreshHeader(user);
+    refreshVerificationControls(user);
+    loadProfile(user);
+    document.dispatchEvent(new CustomEvent('studyflow:profile-updated'));
+
+    if (res.needsVerification) {
+      StudyFlow.UI.showToast('Email updated — please verify your new address.', 'warning');
+    } else if (reseedClass) {
+      StudyFlow.UI.showToast('Class updated & recommended structure loaded into planner!', 'success');
+    } else {
+      StudyFlow.UI.showToast('Profile updated successfully.', 'success');
+    }
+  }
+
   function bindProfileForm() {
     var form = document.getElementById('profile-form');
     form.addEventListener('submit', function (e) {
       e.preventDefault();
       showError('profile-error', '');
 
+      var currentUser = A.currentUser() || {};
       var name = document.getElementById('profile-name').value;
       var email = document.getElementById('profile-email').value;
       var bio = document.getElementById('profile-bio').value;
       var institution = document.getElementById('profile-institution').value;
       var course = document.getElementById('profile-course').value;
       var phone = document.getElementById('profile-phone').value;
+      var classSelect = document.getElementById('profile-class');
+      var newClass = classSelect ? classSelect.value : (currentUser.selectedClass || 'class-10');
+      var oldClass = currentUser.selectedClass || '';
 
-      var patch = { name: name, email: email, bio: bio, institution: institution, course: course, phone: phone };
+      var patch = {
+        name: name,
+        email: email,
+        bio: bio,
+        institution: institution,
+        course: course,
+        phone: phone,
+        selectedClass: newClass,
+        classSelected: true
+      };
       if (pendingAvatar !== null) patch.avatar = pendingAvatar;
 
-      var res = A.updateProfile(patch);
-      if (!res.ok) return showError('profile-error', res.error);
+      if (newClass && oldClass && newClass !== oldClass) {
+        var preset = window.StudyFlow.ClassPresets
+          ? window.StudyFlow.ClassPresets.getPreset(newClass)
+          : { name: newClass };
 
-      pendingAvatar = null;
-      var user = res.user;
-      refreshHeader(user);
-      refreshVerificationControls(user);
-      loadProfile(user);
-      document.dispatchEvent(new CustomEvent('studyflow:profile-updated'));
-
-      if (res.needsVerification) {
-        StudyFlow.UI.showToast('Email updated — please verify your new address.', 'warning');
-      } else {
-        StudyFlow.UI.showToast('Profile updated successfully.', 'success');
+        StudyFlow.Modal.openModal({
+          title: 'Update Planner Structure?',
+          size: 'modal-md',
+          body:
+            '<div style="line-height:1.5; color:var(--text-secondary);">' +
+              '<p>You changed your class to <strong>' + StudyFlow.Utils.escapeHTML(preset.name) + '</strong>.</p>' +
+              '<p>Would you like to reload default curriculum subjects, chapters, and timetable for <strong>' + StudyFlow.Utils.escapeHTML(preset.name) + '</strong> into your planner, or keep your existing custom subjects?</p>' +
+            '</div>',
+          actions: [
+            {
+              label: 'Keep Existing Subjects',
+              class: 'btn-ghost',
+              onClick: function () {
+                StudyFlow.Modal.closeModal();
+                applyProfileSave(patch, false);
+              }
+            },
+            {
+              label: 'Update Class & Load Recommended Structure',
+              class: 'btn-primary',
+              onClick: function () {
+                StudyFlow.Modal.closeModal();
+                applyProfileSave(patch, true);
+              }
+            }
+          ]
+        });
+        return;
       }
+
+      applyProfileSave(patch, false);
     });
   }
 

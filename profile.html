@@ -152,18 +152,61 @@
 
                 <div class="grid grid-cols-2">
                   <div class="form-field">
+                    <label for="profile-class">Class / Education Level</label>
+                    <select class="select" id="profile-class">
+                      <optgroup label="Early Childhood">
+                        <option value="nursery">Nursery</option>
+                        <option value="lkg">LKG (Lower KG)</option>
+                        <option value="ukg">UKG (Upper KG)</option>
+                      </optgroup>
+                      <optgroup label="Primary School">
+                        <option value="class-1">Class 1</option>
+                        <option value="class-2">Class 2</option>
+                        <option value="class-3">Class 3</option>
+                        <option value="class-4">Class 4</option>
+                        <option value="class-5">Class 5</option>
+                      </optgroup>
+                      <optgroup label="Middle School">
+                        <option value="class-6">Class 6</option>
+                        <option value="class-7">Class 7</option>
+                        <option value="class-8">Class 8</option>
+                      </optgroup>
+                      <optgroup label="High School (9–10)">
+                        <option value="class-9">Class 9</option>
+                        <option value="class-10">Class 10</option>
+                      </optgroup>
+                      <optgroup label="Senior Secondary (11–12)">
+                        <option value="class-11">Class 11</option>
+                        <option value="class-12">Class 12</option>
+                      </optgroup>
+                      <optgroup label="College & Higher Education">
+                        <option value="diploma">Diploma</option>
+                        <option value="engineering">Engineering (B.Tech / B.E.)</option>
+                        <option value="undergraduate">Undergraduate (B.A. / B.Sc. / B.Com)</option>
+                        <option value="postgraduate">Postgraduate (Master's / Ph.D.)</option>
+                        <option value="other">Other / Self-Directed</option>
+                      </optgroup>
+                    </select>
+                    <div class="form-hint" style="display:flex;justify-content:space-between;align-items:center;margin-top:4px;">
+                      <span>Sets your default curriculum structure.</span>
+                      <a href="onboarding.html?from=profile" style="color:var(--primary);font-weight:600;text-decoration:none;">Visual picker →</a>
+                    </div>
+                  </div>
+                  <div class="form-field">
+                    <label for="profile-course">Course / Stream / Focus</label>
+                    <input type="text" class="input" id="profile-course" placeholder="e.g. Computer Science, MPC, PCB, Arts">
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-2">
+                  <div class="form-field">
                     <label for="profile-institution">Institution / School</label>
                     <input type="text" class="input" id="profile-institution" placeholder="e.g. University of Example" autocomplete="organization">
                   </div>
                   <div class="form-field">
-                    <label for="profile-course">Course / Year</label>
-                    <input type="text" class="input" id="profile-course" placeholder="e.g. Computer Science, Year 2">
+                    <label for="profile-phone">Phone number</label>
+                    <input type="tel" class="input" id="profile-phone" placeholder="+1 555 000 1234" autocomplete="tel">
                   </div>
-                </div>
-
-                <div class="form-field">
-                  <label for="profile-phone">Phone number</label>
-                  <input type="tel" class="input" id="profile-phone" placeholder="+1 555 000 1234" autocomplete="tel">
                 </div>
 
                 <div class="profile-error hidden" id="profile-error"></div>
@@ -249,6 +292,7 @@
     </div>
   </div>
 
+  <script src="js/class-presets.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/storage.js"></script>
   <script src="js/utils.js"></script>

@@ -165,10 +165,31 @@
             </div>
           </div>
 
+          <div class="card">
+            <div class="card-header">
+              <h2 class="card-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                Academic Level &amp; Curriculum
+              </h2>
+            </div>
+            <div class="card-body">
+              <div class="setting-row">
+                <div>
+                  <div class="setting-name" id="settings-class-name">Class 10</div>
+                  <div class="setting-desc" id="settings-class-desc">Secondary School · Board Exam Track</div>
+                </div>
+                <div class="row-wrap" style="gap:8px;">
+                  <a href="onboarding.html?from=settings" class="btn btn-soft btn-sm" id="btn-change-class">Change Class</a>
+                  <button type="button" class="btn btn-ghost btn-sm" id="btn-reseed-class">Reload Class Subjects</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div class="card danger-zone">
             <div class="card-header">
               <h2 class="card-title" style="color:var(--danger)">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke-currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
                 Danger Zone
               </h2>
             </div>
@@ -190,6 +211,7 @@
     </div>
   </div>
 
+  <script src="js/class-presets.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/storage.js"></script>
   <script src="js/utils.js"></script>

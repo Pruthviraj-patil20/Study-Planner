@@ -1,0 +1,510 @@
+/* ==========================================================================
+   StudyFlow — Class Onboarding Styles
+   Mandatory class selection flow with category filters, interactive cards,
+   subject previews, and responsive layouts.
+   ========================================================================== */
+
+body[data-page='onboarding'] {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 36px 20px 60px;
+  position: relative;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+}
+
+.onboarding-shell {
+  width: 100%;
+  max-width: 1180px;
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* ---------- Header ---------- */
+
+.onboarding-header {
+  text-align: center;
+  max-width: 720px;
+  margin: 0 auto;
+  animation: onbFadeIn 0.4s ease;
+}
+
+.onboarding-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  text-decoration: none;
+}
+
+.onboarding-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  border: 1px solid var(--primary-border);
+}
+
+.onboarding-title {
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  margin: 0 0 10px;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.onboarding-sub {
+  font-size: 15px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* ---------- Filter Bar & Search ---------- */
+
+.onboarding-controls {
+  background: var(--bg-card);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 14px 18px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  animation: onbFadeIn 0.45s ease;
+}
+
+.onboarding-categories {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.cat-pill {
+  background: var(--bg-sunken);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 7px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+}
+
+.cat-pill:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+  border-color: var(--border-strong);
+}
+
+.cat-pill.active {
+  background: var(--primary);
+  color: #ffffff;
+  border-color: var(--primary);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.28);
+}
+
+.onboarding-search-wrap {
+  position: relative;
+  min-width: 240px;
+  flex: 1;
+  max-width: 320px;
+}
+
+.onboarding-search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+}
+
+.onboarding-search {
+  width: 100%;
+  padding-left: 36px !important;
+  height: 38px;
+  font-size: 13.5px;
+  border-radius: 10px;
+}
+
+/* ---------- Main Layout (Cards Grid + Sticky Preview Drawer) ---------- */
+
+.onboarding-layout {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 24px;
+  align-items: start;
+  animation: onbFadeIn 0.5s ease;
+}
+
+.onboarding-layout.no-preview {
+  grid-template-columns: 1fr;
+}
+
+/* ---------- Class Cards Grid ---------- */
+
+.class-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.class-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  border: 1.5px solid var(--border);
+  border-radius: 16px;
+  padding: 18px;
+  cursor: pointer;
+  position: relative;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+              background 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-align: left;
+  user-select: none;
+  box-shadow: var(--shadow-sm);
+}
+
+.class-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--primary-border);
+  box-shadow: var(--shadow-md);
+}
+
+.class-card.selected {
+  border-color: var(--primary);
+  background: var(--bg-card-solid);
+  box-shadow: 0 0 0 2px var(--primary-soft-strong), var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.class-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.class-card-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--primary-soft);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.class-card:hover .class-card-icon {
+  transform: scale(1.05);
+}
+
+.class-card.selected .class-card-icon {
+  background: var(--primary);
+  color: #ffffff;
+}
+
+.class-card-check {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid var(--border-strong);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: transparent;
+  transition: all 0.2s ease;
+}
+
+.class-card.selected .class-card-check {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #ffffff;
+}
+
+.class-card-title {
+  font-size: 17px;
+  font-weight: 750;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.class-card-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 6px;
+  background: var(--bg-sunken);
+  color: var(--text-secondary);
+  display: inline-block;
+  margin-top: 2px;
+}
+
+.class-card-desc {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  line-height: 1.45;
+  margin: 0;
+  flex-grow: 1;
+}
+
+.class-card-subjects {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 4px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+.class-subj-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: var(--bg-sunken);
+  color: var(--text-primary);
+}
+
+.class-subj-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ---------- Preview Panel / Drawer ---------- */
+
+.onboarding-preview {
+  position: sticky;
+  top: 24px;
+  background: var(--bg-card);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  animation: onbSlideIn 0.3s ease;
+}
+
+@keyframes onbSlideIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.preview-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.preview-icon-box {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: var(--primary);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
+}
+
+.preview-title-group h3 {
+  font-size: 19px;
+  font-weight: 800;
+  margin: 0 0 4px;
+  letter-spacing: -0.015em;
+  color: var(--text-primary);
+}
+
+.preview-title-group p {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.preview-section-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  margin: 0 0 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.preview-subjects-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 230px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.preview-subj-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: var(--bg-sunken);
+  border: 1px solid var(--border);
+  gap: 8px;
+  font-size: 13px;
+}
+
+.preview-subj-left {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-weight: 650;
+  color: var(--text-primary);
+}
+
+.preview-subj-count {
+  font-size: 11.5px;
+  color: var(--text-muted);
+}
+
+.preview-structure-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.preview-stat-card {
+  background: var(--bg-sunken);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.preview-stat-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.preview-stat-val {
+  font-size: 15px;
+  font-weight: 750;
+  color: var(--text-primary);
+}
+
+.onboarding-btn-confirm {
+  margin-top: 4px;
+  height: 46px;
+  font-size: 15px;
+  font-weight: 700;
+  border-radius: 12px;
+}
+
+.onboarding-cancel-link {
+  text-align: center;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+}
+
+/* ---------- Custom Class / Other input ---------- */
+
+.custom-class-field {
+  margin-top: 10px;
+  animation: onbFadeIn 0.25s ease;
+}
+
+/* ---------- Animations ---------- */
+
+@keyframes onbFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------- Responsive Layout ---------- */
+
+@media (max-width: 980px) {
+  .onboarding-layout {
+    grid-template-columns: 1fr;
+  }
+  .onboarding-preview {
+    position: static;
+    top: auto;
+  }
+}
+
+@media (max-width: 640px) {
+  body[data-page='onboarding'] {
+    padding: 24px 14px 50px;
+  }
+  .onboarding-title {
+    font-size: 25px;
+  }
+  .class-grid {
+    grid-template-columns: 1fr;
+  }
+  .onboarding-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .onboarding-search-wrap {
+    max-width: none;
+  }
+  .onboarding-categories {
+    overflow-x: auto;
+    padding-bottom: 4px;
+    flex-wrap: nowrap;
+  }
+}
