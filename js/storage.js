@@ -46,21 +46,18 @@ window.StudyFlow = window.StudyFlow || {};
     dailyGoal: 120,
     focusDefault: 25,
     breakDefault: 5,
-    weekStart: 0
-  };
-
   function getDefaultAPIKey() {
     try {
-      return atob('QVEuQWI4Uk42THNETGs3bXF2N0lmVDEwc0lRdFdMT0tyWWlQMHROWHlka2RlczhjblJoaGc=');
+      return atob('c2stc3ZjYWNjdC1FY2M5VnNHcmxTeG5aTVRmMDgzWlNmSFRBUVNLTkVsMnZha3ZtVnp0NmFWblU3YXFZdGRQLURyVjhPd202RjFmWU9yTWZFQ2VIVDNCbGJrRkoxWEFLMkthMUxqbEdSRGdwb0d2WENkQUpHbmZVSEJuSm1WY1JoeWlLSHBsRzl1TXRRWG5qYjAxNlFsTHAxWmpyQk1TN0FlY0Q0QQ==');
     } catch (e) {
       return '';
     }
   }
 
   const DEFAULT_AI_CONFIG = {
-    provider: 'gemini', // 'openai' | 'gemini' | 'groq' | 'custom'
+    provider: 'openai', // 'openai' | 'gemini' | 'groq' | 'custom'
     apiKey: getDefaultAPIKey(),
-    model: 'gemini-1.5-flash',
+    model: 'gpt-4o-mini',
     customEndpoint: '',
     systemInstructions: '',
     voiceInputEnabled: true,
@@ -148,7 +145,7 @@ window.StudyFlow = window.StudyFlow || {};
   function getAIConfig() {
     const loaded = loadData(scopedKey('ai_config'), {});
     const cfg = Object.assign({}, DEFAULT_AI_CONFIG, loaded);
-    if (!cfg.apiKey) {
+    if (!cfg.apiKey || !cfg.apiKey.trim()) {
       cfg.apiKey = getDefaultAPIKey();
     }
     return cfg;
