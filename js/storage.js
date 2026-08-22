@@ -19,6 +19,9 @@ window.StudyFlow = window.StudyFlow || {};
     notes: 'notes',
     focus: 'focus_sessions',
     settings: 'settings',
+    ai_config: 'ai_config',
+    ai_chats: 'ai_chats',
+    ai_bookmarks: 'ai_bookmarks',
     seeded: 'seeded'
   };
 
@@ -31,6 +34,9 @@ window.StudyFlow = window.StudyFlow || {};
     notes: 'studyflow_notes',
     focus: 'studyflow_focus_sessions',
     settings: 'studyflow_settings',
+    ai_config: 'studyflow_ai_config',
+    ai_chats: 'studyflow_ai_chats',
+    ai_bookmarks: 'studyflow_ai_bookmarks',
     seeded: 'studyflow_seeded'
   };
 
@@ -41,6 +47,17 @@ window.StudyFlow = window.StudyFlow || {};
     focusDefault: 25,
     breakDefault: 5,
     weekStart: 0
+  };
+
+  const DEFAULT_AI_CONFIG = {
+    provider: 'openai', // 'openai' | 'gemini' | 'groq' | 'custom'
+    apiKey: '',
+    model: 'gpt-4o-mini',
+    customEndpoint: '',
+    systemInstructions: '',
+    voiceInputEnabled: true,
+    voiceOutputEnabled: false,
+    temperature: 0.7
   };
 
   /* ---------- Key resolution ---------- */
@@ -120,6 +137,16 @@ window.StudyFlow = window.StudyFlow || {};
     saveData(scopedKey('settings'), merged);
     return merged;
   }
+  function getAIConfig() { return Object.assign({}, DEFAULT_AI_CONFIG, loadData(scopedKey('ai_config'), {})); }
+  function setAIConfig(patch) {
+    const merged = Object.assign({}, getAIConfig(), patch);
+    saveData(scopedKey('ai_config'), merged);
+    return merged;
+  }
+  function getAIChats() { return loadData(scopedKey('ai_chats'), []); }
+  function setAIChats(list) { return saveData(scopedKey('ai_chats'), list); }
+  function getAIBookmarks() { return loadData(scopedKey('ai_bookmarks'), []); }
+  function setAIBookmarks(list) { return saveData(scopedKey('ai_bookmarks'), list); }
 
   /* ---------- Seed data (per user, on first launch of their account) ---------- */
 
@@ -492,6 +519,12 @@ window.StudyFlow = window.StudyFlow || {};
     setFocusSessions,
     getSettings,
     setSettings,
+    getAIConfig,
+    setAIConfig,
+    getAIChats,
+    setAIChats,
+    getAIBookmarks,
+    setAIBookmarks,
     seedIfNeeded,
     seedForUser,
     seedForClass,

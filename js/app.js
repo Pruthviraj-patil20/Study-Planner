@@ -631,6 +631,11 @@
     ensureBackgroundIllustration();
     initSidebar();
     initProfileWidget(user);
+
+    if (window.StudyFlow.AIAssistant && window.StudyFlow.AIAssistant.init) {
+      window.StudyFlow.AIAssistant.init();
+    }
+
     document.dispatchEvent(new CustomEvent('studyflow:ready'));
   });
 })();

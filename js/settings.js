@@ -197,6 +197,73 @@
     });
   }
 
+  /* ---------- AI Assistant Settings ---------- */
+
+  function loadAISettings() {
+    const config = S.getAIConfig();
+    const prov = document.getElementById('ai-provider');
+    const key = document.getElementById('ai-key');
+    const model = document.getElementById('ai-model');
+    const customUrl = document.getElementById('ai-custom-url');
+    const voiceOutput = document.getElementById('ai-voice-output');
+    const customWrap = document.getElementById('ai-custom-url-wrap');
+
+    if (prov) prov.value = config.provider || 'openai';
+    if (key) key.value = config.apiKey || '';
+    if (model) model.value = config.model || '';
+    if (customUrl) customUrl.value = config.customEndpoint || '';
+    if (voiceOutput) voiceOutput.checked = !!config.voiceOutputEnabled;
+
+    if (prov && customWrap) {
+      customWrap.classList.toggle('hidden', prov.value !== 'custom');
+      prov.onchange = () => {
+        customWrap.classList.toggle('hidden', prov.value !== 'custom');
+      };
+    }
+  }
+
+  function bindAISettings() {
+    const saveBtn = document.getElementById('btn-save-ai-settings');
+    const clearBtn = document.getElementById('btn-clear-ai-history');
+
+    if (saveBtn) {
+      saveBtn.addEventListener('click', () => {
+        const prov = document.getElementById('ai-provider');
+        const key = document.getElementById('ai-key');
+        const model = document.getElementById('ai-model');
+        const customUrl = document.getElementById('ai-custom-url');
+        const voiceOutput = document.getElementById('ai-voice-output');
+
+        const patch = {
+          provider: prov ? prov.value : 'openai',
+          apiKey: key ? key.value.trim() : '',
+          model: model ? model.value.trim() : 'gpt-4o-mini',
+          customEndpoint: customUrl ? customUrl.value.trim() : '',
+          voiceOutputEnabled: voiceOutput ? voiceOutput.checked : false
+        };
+
+        S.setAIConfig(patch);
+        StudyFlow.UI.showToast('AI Study Assistant settings saved!', 'success');
+      });
+    }
+
+    if (clearBtn) {
+      clearBtn.addEventListener('click', async () => {
+        const confirmed = await StudyFlow.Modal.confirmDialog({
+          title: 'Clear AI Conversation History?',
+          message: 'This will delete all saved chat messages with your AI Study Assistant.',
+          confirmText: 'Clear History',
+          danger: true
+        });
+
+        if (confirmed) {
+          S.setAIChats([]);
+          StudyFlow.UI.showToast('AI conversation history cleared.', 'info');
+        }
+      });
+    }
+  }
+
   /* ---------- Danger Zone / Reset All Data ---------- */
 
   function bindDangerZone() {
@@ -216,6 +283,7 @@
         S.seedIfNeeded();
         loadPreferences();
         loadClassInfo();
+        loadAISettings();
         syncThemeButtons();
         StudyFlow.UI.showToast('All data has been reset to default.', 'info');
       }
@@ -229,6 +297,8 @@
     bindAppearance();
     loadPreferences();
     bindPreferences();
+    loadAISettings();
+    bindAISettings();
     loadClassInfo();
     bindClassSection();
     bindDangerZone();
