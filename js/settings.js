@@ -247,6 +247,20 @@
       });
     }
 
+    const resetFreeBtn = document.getElementById('btn-reset-free-ai');
+    if (resetFreeBtn) {
+      resetFreeBtn.addEventListener('click', () => {
+        S.setAIConfig({
+          provider: 'openai',
+          apiKey: '',
+          model: 'gpt-4o-mini',
+          customEndpoint: ''
+        });
+        loadAISettings();
+        StudyFlow.UI.showToast('Switched to free built-in StudyFlow Academic Solver!', 'success');
+      });
+    }
+
     if (clearBtn) {
       clearBtn.addEventListener('click', async () => {
         const confirmed = await StudyFlow.Modal.confirmDialog({

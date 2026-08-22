@@ -473,6 +473,10 @@ window.StudyFlow = window.StudyFlow || {};
       if (!geminiRes.ok) {
         var errData = await geminiRes.json().catch(function () { return {}; });
         var errMsg = (errData.error && errData.error.message) || ('Gemini API Error ' + geminiRes.status);
+        if (geminiRes.status === 429 || errMsg.toLowerCase().includes('quota') || errMsg.toLowerCase().includes('rate limit')) {
+          console.warn('Gemini quota exceeded. Falling back to built-in academic solver.');
+          return localEducationalInference(userQuery, imageBase64, history) + '\n\n*(Note: API key quota limit reached. Answer generated via built-in StudyFlow Academic Solver.)*';
+        }
         throw new Error(errMsg);
       }
 
@@ -537,6 +541,10 @@ window.StudyFlow = window.StudyFlow || {};
     if (!oaiRes.ok) {
       var oaiErr = await oaiRes.json().catch(function () { return {}; });
       var msg = (oaiErr.error && oaiErr.error.message) || (provider.toUpperCase() + ' API error (' + oaiRes.status + ')');
+      if (oaiRes.status === 429 || msg.toLowerCase().includes('quota') || msg.toLowerCase().includes('rate limit')) {
+        console.warn('OpenAI quota exceeded. Falling back to built-in academic solver.');
+        return localEducationalInference(userQuery, imageBase64, history) + '\n\n*(Note: Custom OpenAI key quota exceeded. Answer generated via built-in StudyFlow Academic Solver.)*';
+      }
       throw new Error(msg);
     }
 
@@ -845,7 +853,10 @@ window.StudyFlow = window.StudyFlow || {};
             '<label for="ai-cfg-endpoint">Base URL / Endpoint</label>' +
             '<input type="text" class="input" id="ai-cfg-endpoint" placeholder="https://api.openai.com/v1/chat/completions">' +
           '</div>' +
-          '<button type="button" class="btn btn-primary btn-block" id="ai-btn-save-config">Save Settings</button>' +
+          '<div style="display:flex;flex-direction:column;gap:8px;margin-top:10px;">' +
+            '<button type="button" class="btn btn-primary btn-block" id="ai-btn-save-config">Save Settings</button>' +
+            '<button type="button" class="btn btn-soft btn-block" id="ai-btn-free-mode">✨ Use Free Academic Solver</button>' +
+          '</div>' +
         '</div>' +
       '</div>';
 
@@ -1097,8 +1108,11 @@ window.StudyFlow = window.StudyFlow || {};
       }
     } catch (err) {
       removeTypingIndicator();
-      var errMsg = '⚠️ **Error:** ' + err.message + '\n\n*Tip: Check your API Key in Settings or leave it blank to use the built-in free academic solver.*';
-      appendMessage('assistant', errMsg);
+      console.warn('AI API Error:', err.message);
+      var fallbackAnswer = localEducationalInference(query || 'Please explain this topic.', img, S.getAIChats());
+      var notice = '\n\n*(Note: Upstream API returned: "' + err.message + '". Answer provided by StudyFlow Academic Solver.)*';
+      appendMessage('assistant', fallbackAnswer + notice);
+      saveChatMessage('assistant', fallbackAnswer + notice);
     } finally {
       isGenerating = false;
       if (sendBtn) sendBtn.disabled = false;
@@ -1178,6 +1192,19 @@ window.StudyFlow = window.StudyFlow || {};
         if (configPane) configPane.classList.remove('open');
         refreshContextBanner();
         StudyFlow.UI.showToast('AI Settings updated successfully!', 'success');
+      });
+    }
+
+    // Free mode button in drawer
+    var freeModeBtn = document.getElementById('ai-btn-free-mode');
+    if (freeModeBtn) {
+      freeModeBtn.addEventListener('click', function () {
+        S.setAIConfig({ apiKey: '' });
+        var keyInput = document.getElementById('ai-cfg-apikey');
+        if (keyInput) keyInput.value = '';
+        if (configPane) configPane.classList.remove('open');
+        refreshContextBanner();
+        StudyFlow.UI.showToast('Switched to free built-in StudyFlow Academic Solver!', 'success');
       });
     }
 
