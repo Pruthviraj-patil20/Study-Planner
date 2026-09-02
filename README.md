@@ -1,6 +1,8 @@
 # 📚 StudyFlow
 
-StudyFlow is a modern, comprehensive Study Planner and Dashboard tailored for students and developers. It is built entirely using HTML, CSS, and Vanilla JavaScript, requiring zero dependencies, build steps, or backend servers to run. All data is persisted locally in your browser using `localStorage`.
+> Your ultimate, privacy-first study operating system built for modern students and lifelong learners.
+
+StudyFlow is a comprehensive Study Planner and Dashboard tailored for students and developers. It is built entirely using HTML, CSS, and Vanilla JavaScript, requiring zero dependencies, build steps, or backend servers to run. All data is persisted locally in your browser using `localStorage`.
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Version](https://img.shields.io/badge/version-1.0.0-success.svg)
@@ -12,23 +14,70 @@ StudyFlow is a modern, comprehensive Study Planner and Dashboard tailored for st
 
 🔗 **[StudyFlow Live Demo](https://pruthviraj-patil20.github.io/Study-Planner/)**
 
+---
+
+## 📑 Table of Contents
+- [Key Features](#-key-features)
+- [Architecture](#-architecture)
+- [Tech Stack](#-tech-stack)
+- [Project Structure](#-project-structure)
+- [Getting Started](#-getting-started)
+- [Deployment](#-deployment)
+- [Usage](#-usage)
+- [Contributing](#-contributing)
+
+---
+
 ## ✨ Key Features
 
-- **📊 Dashboard:** Get a quick glance at your study hours, completed tasks, upcoming exams, and overall progress.
-- **📅 Planner (Weekly & Daily):** A detailed calendar view to schedule and manage study sessions.
-- **✅ Task Management:** Interactive Kanban board with drag-and-drop support to track assignments and topics (To Do, In Progress, Done).
-- **⏱️ Pomodoro Focus Timer:** Built-in timer with circular progress indicators to help you get into deep work sessions.
-- **🤖 AI Assistant:** Get smart recommendations and help with your study plan.
-- **📝 Notes & Exams:** Keep track of your quick notes, summaries, and upcoming examinations.
-- **📈 Analytics:** Visual statistics of your study habits and completion streaks.
-- **⚙️ Settings & Profile:** Customize your experience and manage your data easily.
-- **🎨 Theming & Customization:** Works seamlessly on desktop and mobile. Includes Light, Dark, and a special Rainbow mode!
+| Feature | Description |
+|---------|-------------|
+| **📊 Dashboard** | Quick glance at study hours, completed tasks, upcoming exams, and overall progress. |
+| **📅 Planner** | A detailed weekly & daily calendar view to schedule and manage study sessions. |
+| **✅ Kanban Tasks** | Interactive board with drag-and-drop support (To Do, In Progress, Done). |
+| **⏱️ Focus Timer** | Built-in Pomodoro timer with circular progress indicators for deep work. |
+| **🤖 AI Assistant** | Get smart recommendations and help with your study plan. |
+| **📝 Notes & Exams** | Keep track of your quick notes, summaries, and upcoming examinations. |
+| **🎨 Theming** | Fully responsive. Includes Light, Dark, and a special Rainbow mode! |
+
+---
+
+## 🏗 Architecture
+
+StudyFlow is a completely client-side application. Here is how the data flows:
+
+```mermaid
+graph TD;
+    User((User)) -->|Interacts| UI[User Interface HTML/CSS];
+    UI -->|Triggers Events| Logic[Vanilla JS App Logic];
+    Logic -->|Reads/Writes| Storage[(Browser LocalStorage)];
+    Logic -->|Fetches Data| AI[AI Assistant API Optional];
+```
+
+---
 
 ## 🛠 Tech Stack
 
 - **HTML5:** Clean, semantic HTML structure.
 - **CSS3:** Custom styles, CSS variables for theming, CSS Grid & Flexbox layouts.
-- **Vanilla JavaScript:** DOM manipulation, drag-and-drop API, local storage data management, and state logic without any external libraries (no React, Vue, or Angular).
+- **Vanilla JavaScript:** DOM manipulation, drag-and-drop API, local storage data management, and state logic without any external libraries.
+
+---
+
+## 📂 Project Structure
+
+```text
+Study-Planner/
+├── index.html          # Dashboard entry point
+├── planner.html        # Weekly/Daily calendar
+├── tasks.html          # Kanban board
+├── focus.html          # Pomodoro timer
+├── css/                # Stylesheets (layout, theme, responsive)
+├── js/                 # Application logic (app.js, storage.js, etc.)
+└── assets/             # Images and icons
+```
+
+---
 
 ## 🚀 Getting Started
 
@@ -49,11 +98,15 @@ Since StudyFlow is a completely static, client-side application, there is no com
    - On Windows: `start index.html`
    - Or simply double-click the `index.html` file in your file explorer.
 
+---
+
 ## ☁️ Deployment
 
 StudyFlow is configured to be easily deployed on modern platforms:
 - **Vercel:** Just import the repository and deploy (`vercel.json` included).
 - **Netlify:** Ready to go out of the box (`netlify.toml` included).
+
+---
 
 ## 💡 Usage
 
@@ -61,6 +114,8 @@ StudyFlow is configured to be easily deployed on modern platforms:
 - **Start a Focus Session:** Go to the Focus page to use the Pomodoro timer.
 - **Plan your Week:** Use the Planner to block out times for specific subjects. Click on any time block to edit it.
 - **Ask the AI:** Click on the AI Assistant to get study tips and schedule optimization.
+
+---
 
 ## 🤝 Contributing
 
@@ -71,6 +126,8 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
 4. Push to the branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
+
+---
 
 ## 📄 License
 
