@@ -113,11 +113,8 @@ window.StudyFlow = window.StudyFlow || {};
   function clearAllData() {
     const uid = currentUserId();
     Object.keys(TYPES).forEach((type) => {
-      if (type !== 'seeded') {
-        deleteData(scopedKey(type, uid));
-      }
+      deleteData(scopedKey(type, uid));
     });
-    saveData(scopedKey('seeded', uid), true);
   }
 
   /* ---------- Typed accessors (user-scoped) ---------- */
@@ -282,7 +279,7 @@ window.StudyFlow = window.StudyFlow || {};
 
   /* ---------- Class-specific seed generator ---------- */
 
-  function buildClassSeedData(classKey) {
+  function buildClassSeedData(classKey, empty = false) {
     if (!window.StudyFlow || !window.StudyFlow.ClassPresets) {
       return buildSeedData();
     }
@@ -305,7 +302,7 @@ window.StudyFlow = window.StudyFlow || {};
         chapters: chapterList.map((chName, i) => ({
           id: id('chap'),
           name: chName,
-          completed: i < Math.floor(chapterList.length * 0.4)
+          completed: empty ? false : (i < Math.floor(chapterList.length * 0.4))
         }))
       };
     });
@@ -320,7 +317,7 @@ window.StudyFlow = window.StudyFlow || {};
     };
 
     // 2. Build Tasks
-    const tasks = (preset.tasks || []).map((t, idx) => ({
+    const tasks = empty ? [] : (preset.tasks || []).map((t, idx) => ({
       id: id('task'),
       title: t.title,
       description: t.description || '',
@@ -334,7 +331,7 @@ window.StudyFlow = window.StudyFlow || {};
     }));
 
     // 3. Build Study Sessions
-    const sessions = (preset.sessions || []).map((sess, idx) => ({
+    const sessions = empty ? [] : (preset.sessions || []).map((sess, idx) => ({
       id: id('sess'),
       subjectId: getSubjectId(sess.subjectIndex ?? (idx % subjects.length)),
       topic: sess.topic || 'Core concept revision',
@@ -349,7 +346,7 @@ window.StudyFlow = window.StudyFlow || {};
     }));
 
     // 4. Build Exams
-    const exams = (preset.exams || []).map((ex, idx) => {
+    const exams = empty ? [] : (preset.exams || []).map((ex, idx) => {
       const sId = getSubjectId(ex.subjectIndex ?? (idx % subjects.length));
       const subj = subjects.find((s) => s.id === sId);
       const chaps = subj && subj.chapters ? subj.chapters.slice(0, 3).map((c) => c.name) : ['Unit 1', 'Unit 2'];
@@ -369,7 +366,7 @@ window.StudyFlow = window.StudyFlow || {};
     });
 
     // 5. Build Notes
-    const notes = (preset.notes || []).map((n, idx) => ({
+    const notes = empty ? [] : (preset.notes || []).map((n, idx) => ({
       id: id('note'),
       title: n.title,
       subjectId: getSubjectId(n.subjectIndex ?? (idx % subjects.length)),
@@ -381,7 +378,7 @@ window.StudyFlow = window.StudyFlow || {};
 
     // 6. Build Focus History
     const focus = [];
-    if (subjects.length > 0) {
+    if (subjects.length > 0 && !empty) {
       const focusDur = preset.focusDefault || 30;
       const history = [
         { d: 0, sIdx: 0, dur: focusDur },
@@ -413,10 +410,10 @@ window.StudyFlow = window.StudyFlow || {};
     return { subjects, tasks, sessions, exams, notes, focus, settings };
   }
 
-  function seedForClass(uid, classKey) {
+  function seedForClass(uid, classKey, empty = false) {
     uid = uid || currentUserId();
     if (!uid) return false;
-    const data = buildClassSeedData(classKey);
+    const data = buildClassSeedData(classKey, empty);
     saveData(scopedKey('subjects', uid), data.subjects);
     saveData(scopedKey('tasks', uid), data.tasks);
     saveData(scopedKey('sessions', uid), data.sessions);
@@ -466,6 +463,27 @@ window.StudyFlow = window.StudyFlow || {};
     return seedForUser(uid, { importLegacy: hasLegacyData() });
   }
 
+  function resetDataEmpty() {
+    const uid = currentUserId();
+    if (!uid) return false;
+    clearAllData();
+    const user = StudyFlow.Auth ? StudyFlow.Auth.currentUser() : null;
+    const classKey = (user && user.selectedClass) || 'class-10';
+    if (window.StudyFlow && window.StudyFlow.ClassPresets) {
+      seedForClass(uid, classKey, true);
+    } else {
+      saveData(scopedKey('subjects', uid), []);
+      saveData(scopedKey('tasks', uid), []);
+      saveData(scopedKey('sessions', uid), []);
+      saveData(scopedKey('exams', uid), []);
+      saveData(scopedKey('notes', uid), []);
+      saveData(scopedKey('focus', uid), []);
+      saveData(scopedKey('settings', uid), DEFAULT_SETTINGS);
+      saveData(scopedKey('seeded', uid), true);
+    }
+    return true;
+  }
+
   /* ---------- Legacy (pre-auth) data migration ---------- */
 
   function hasLegacyData() {
@@ -508,6 +526,7 @@ window.StudyFlow = window.StudyFlow || {};
     deleteData,
     updateData,
     clearAllData,
+    resetDataEmpty,
     getSubjects,
     setSubjects,
     getTasks,

@@ -293,7 +293,7 @@
       });
 
       if (confirmed) {
-        S.clearAllData();
+        S.resetDataEmpty();
         loadPreferences();
         loadClassInfo();
         loadAISettings();
