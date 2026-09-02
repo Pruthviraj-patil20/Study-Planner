@@ -299,7 +299,8 @@
         loadClassInfo();
         loadAISettings();
         syncThemeButtons();
-        StudyFlow.UI.showToast('All data has been reset to default.', 'info');
+        StudyFlow.UI.showToast('All data has been reset to default. Reloading...', 'info');
+        setTimeout(() => window.location.reload(), 1500);
       }
     });
   }

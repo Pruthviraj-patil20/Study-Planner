@@ -25,7 +25,11 @@
       document.body.style.overflow = '';
     }
 
-    menuToggle && menuToggle.addEventListener('click', open);
+    document.addEventListener('click', (e) => {
+      if (e.target.closest('#menu-toggle') || e.target.closest('.menu-toggle')) {
+        open();
+      }
+    });
     closeBtn && closeBtn.addEventListener('click', close);
     backdrop && backdrop.addEventListener('click', close);
 
