@@ -113,8 +113,11 @@ window.StudyFlow = window.StudyFlow || {};
   function clearAllData() {
     const uid = currentUserId();
     Object.keys(TYPES).forEach((type) => {
-      deleteData(scopedKey(type, uid));
+      if (type !== 'seeded') {
+        deleteData(scopedKey(type, uid));
+      }
     });
+    saveData(scopedKey('seeded', uid), true);
   }
 
   /* ---------- Typed accessors (user-scoped) ---------- */

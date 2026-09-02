@@ -294,7 +294,6 @@
 
       if (confirmed) {
         S.clearAllData();
-        S.seedIfNeeded();
         loadPreferences();
         loadClassInfo();
         loadAISettings();
