@@ -291,15 +291,18 @@
     }
 
     var params = new URLSearchParams(window.location.search);
-    isChangingClass = params.get('change') === '1' || params.get('from') === 'profile' || params.get('from') === 'settings';
+    var fromParam = params.get('from');
+    isChangingClass = params.get('change') === '1' || !!fromParam;
     var redirectParam = params.get('redirect');
     if (redirectParam) {
       try { redirectTarget = decodeURIComponent(redirectParam); } catch (e) { redirectTarget = 'index.html'; }
       if (/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(redirectTarget) || redirectTarget.indexOf('//') === 0) {
         redirectTarget = 'index.html';
       }
-    } else if (isChangingClass) {
-      redirectTarget = params.get('from') === 'settings' ? 'settings.html' : 'profile.html';
+    } else if (fromParam === 'settings') {
+      redirectTarget = 'settings.html';
+    } else if (fromParam === 'profile') {
+      redirectTarget = 'profile.html';
     } else {
       redirectTarget = 'index.html';
     }
