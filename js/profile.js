@@ -74,9 +74,43 @@
     document.getElementById('email-hint').textContent = user.emailVerified
       ? ''
       : 'Changing your email will require reverification.';
+
+    syncCharacterSelection(user.avatar);
   }
 
-  /* ---------- Avatar upload ---------- */
+  /* ---------- Avatar upload & Characters ---------- */
+
+  function syncCharacterSelection(avatarUrl) {
+    var AC = window.StudyFlow && window.StudyFlow.AvatarCharacters;
+    var grid = document.getElementById('avatar-characters-grid');
+    var banner = document.getElementById('avatar-selected-banner');
+    var nameEl = document.getElementById('avatar-selected-name');
+    var descEl = document.getElementById('avatar-selected-desc');
+    if (!AC || !grid) return;
+
+    var cards = grid.querySelectorAll('.avatar-char-card');
+    var activeChar = AC.getByDataUrl(avatarUrl);
+
+    cards.forEach(function (card) {
+      card.classList.toggle('selected', !!(activeChar && card.getAttribute('data-id') === activeChar.id));
+    });
+
+    if (banner && nameEl && descEl) {
+      if (activeChar) {
+        banner.style.display = 'flex';
+        nameEl.textContent = activeChar.name + ' · ' + activeChar.title;
+        descEl.textContent = activeChar.description;
+      } else if (avatarUrl && avatarUrl.startsWith('data:image/jpeg')) {
+        banner.style.display = 'flex';
+        nameEl.textContent = 'Custom Photo';
+        descEl.textContent = 'Uploaded from your device.';
+      } else {
+        banner.style.display = 'flex';
+        nameEl.textContent = 'Initials Monogram';
+        descEl.textContent = 'Auto-generated from your full name.';
+      }
+    }
+  }
 
   function processImageFile(file) {
     return new Promise(function (resolve, reject) {
@@ -120,6 +154,7 @@
       processImageFile(file).then(function (dataUrl) {
         pendingAvatar = dataUrl;
         document.getElementById('form-avatar').src = dataUrl;
+        syncCharacterSelection(dataUrl);
         showError('profile-error', '');
       }).catch(function (err) {
         showError('profile-error', err.message);
@@ -128,9 +163,147 @@
 
     document.getElementById('btn-remove-photo').addEventListener('click', function () {
       pendingAvatar = '';
-      document.getElementById('form-avatar').src = A.avatarSrc(A.currentUser());
+      var defaultSrc = A.avatarSrc(A.currentUser());
+      document.getElementById('form-avatar').src = defaultSrc;
+      var headAvatar = document.getElementById('head-avatar');
+      if (headAvatar) headAvatar.src = defaultSrc;
+      syncCharacterSelection('');
       showError('profile-error', '');
     });
+  }
+
+  function bindAvatarCharacters() {
+    var AC = window.StudyFlow && window.StudyFlow.AvatarCharacters;
+    var grid = document.getElementById('avatar-characters-grid');
+    if (!AC || !grid) return;
+
+    var characters = AC.getAll();
+    grid.innerHTML = characters.map(function (c) {
+      return (
+        '<button type="button" class="avatar-char-card" data-id="' + c.id + '" data-category="' + c.category + '" style="--char-accent: ' + c.accent + '" title="' + c.name + ' · ' + c.title + '">' +
+          '<span class="avatar-char-card-check">&#10003;</span>' +
+          '<div class="avatar-char-thumb-wrap">' +
+            '<img src="' + c.dataUrl + '" class="avatar-char-thumb" alt="' + c.name + '">' +
+          '</div>' +
+          '<div class="avatar-char-name">' + c.name + '</div>' +
+          '<div class="avatar-char-title">' + c.title + '</div>' +
+          '<span class="avatar-char-tag">' + c.tag + '</span>' +
+        '</button>'
+      );
+    }).join('');
+
+    // Highlight current user's avatar
+    var user = A.currentUser() || {};
+    syncCharacterSelection(user.avatar);
+
+    // Card click: pick character
+    grid.addEventListener('click', function (e) {
+      var card = e.target.closest('.avatar-char-card');
+      if (!card) return;
+      var charId = card.getAttribute('data-id');
+      var charObj = AC.getById(charId);
+      if (!charObj) return;
+
+      pendingAvatar = charObj.dataUrl;
+      document.getElementById('form-avatar').src = charObj.dataUrl;
+      var headAvatar = document.getElementById('head-avatar');
+      if (headAvatar) headAvatar.src = charObj.dataUrl;
+
+      syncCharacterSelection(charObj.dataUrl);
+
+      if (window.StudyFlow && window.StudyFlow.UI) {
+        StudyFlow.UI.showToast('Selected ' + charObj.name + ' · ' + charObj.title, 'info');
+      }
+    });
+
+    // Category filter pills
+    var pillsWrap = document.getElementById('avatar-filter-pills');
+    if (pillsWrap) {
+      pillsWrap.addEventListener('click', function (e) {
+        var pill = e.target.closest('.avatar-filter-pill');
+        if (!pill) return;
+        var filter = pill.getAttribute('data-filter');
+
+        pillsWrap.querySelectorAll('.avatar-filter-pill').forEach(function (p) {
+          p.classList.toggle('active', p === pill);
+        });
+
+        grid.querySelectorAll('.avatar-char-card').forEach(function (card) {
+          var cat = card.getAttribute('data-category');
+          var visible = filter === 'all' || cat === filter;
+          card.style.display = visible ? 'flex' : 'none';
+        });
+      });
+    }
+
+    // Surprise Me / Random button
+    var randBtn = document.getElementById('btn-random-avatar');
+    if (randBtn) {
+      randBtn.addEventListener('click', function () {
+        var currentActive = grid.querySelector('.avatar-char-card.selected');
+        var currentId = currentActive ? currentActive.getAttribute('data-id') : null;
+        var picked = AC.getRandom(currentId);
+        if (!picked) return;
+
+        pendingAvatar = picked.dataUrl;
+        document.getElementById('form-avatar').src = picked.dataUrl;
+        var headAvatar = document.getElementById('head-avatar');
+        if (headAvatar) headAvatar.src = picked.dataUrl;
+
+        // Reset filter to 'all' so the card is visible
+        if (pillsWrap) {
+          pillsWrap.querySelectorAll('.avatar-filter-pill').forEach(function (p) {
+            p.classList.toggle('active', p.getAttribute('data-filter') === 'all');
+          });
+          grid.querySelectorAll('.avatar-char-card').forEach(function (card) {
+            card.style.display = 'flex';
+          });
+        }
+
+        syncCharacterSelection(picked.dataUrl);
+
+        var targetCard = grid.querySelector('.avatar-char-card[data-id="' + picked.id + '"]');
+        if (targetCard) {
+          targetCard.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        }
+
+        if (window.StudyFlow && window.StudyFlow.UI) {
+          StudyFlow.UI.showToast('🎲 Surprise: ' + picked.name + ' · ' + picked.title + '!', 'info');
+        }
+      });
+    }
+
+    // Use Initials button
+    var initialsBtn = document.getElementById('btn-use-initials');
+    if (initialsBtn) {
+      initialsBtn.addEventListener('click', function () {
+        pendingAvatar = '';
+        var u = A.currentUser();
+        var src = A.avatarSrc({ name: u ? u.name : '', avatar: null });
+        document.getElementById('form-avatar').src = src;
+        var headAvatar = document.getElementById('head-avatar');
+        if (headAvatar) headAvatar.src = src;
+
+        syncCharacterSelection('');
+
+        if (window.StudyFlow && window.StudyFlow.UI) {
+          StudyFlow.UI.showToast('Reset to initials avatar.', 'info');
+        }
+      });
+    }
+
+    // Quick "Save This Avatar" button in the selection banner
+    var applyNowBtn = document.getElementById('btn-apply-avatar-now');
+    if (applyNowBtn) {
+      applyNowBtn.addEventListener('click', function () {
+        var avatarToSave = pendingAvatar;
+        if (avatarToSave === null) {
+          var u = A.currentUser() || {};
+          avatarToSave = u.avatar || '';
+        }
+        applyProfileSave({ avatar: avatarToSave });
+      });
+    }
   }
 
   /* ---------- Save personal info ---------- */
@@ -343,6 +516,7 @@
     refreshVerificationControls(user);
     loadProfile(user);
     bindAvatar();
+    bindAvatarCharacters();
     bindProfileForm();
     bindPasswordForm();
     bindVerification();

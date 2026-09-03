@@ -125,11 +125,61 @@
                   <img class="profile-photo" id="form-avatar" alt="Profile photo" referrerpolicy="no-referrer">
                   <div>
                     <div class="setting-name">Profile photo</div>
-                    <div class="setting-desc">Upload a photo or use your initials avatar.</div>
+                    <div class="setting-desc">Upload a photo, pick an avatar character below, or use your initials avatar.</div>
                     <div class="row-wrap mt-4">
                       <input type="file" id="avatar-file" accept="image/*" hidden>
                       <button type="button" class="btn btn-soft btn-sm" id="btn-upload-photo">Upload photo</button>
                       <button type="button" class="btn btn-ghost btn-sm" id="btn-remove-photo">Remove</button>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="avatar-picker-box">
+                  <div class="avatar-picker-top">
+                    <div>
+                      <div class="avatar-picker-title">
+                        <span class="avatar-picker-title-icon">&#127912;</span>
+                        Choose an Avatar Character
+                      </div>
+                      <div class="avatar-picker-subtitle">
+                        Select a fun vector character that matches your study personality, or roll a surprise!
+                      </div>
+                    </div>
+                    <div class="avatar-picker-actions">
+                      <button type="button" class="btn btn-soft btn-xs" id="btn-random-avatar" title="Roll a random character avatar">
+                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="8.5" cy="8.5" r="1.5"/><circle cx="15.5" cy="8.5" r="1.5"/><circle cx="15.5" cy="15.5" r="1.5"/><circle cx="8.5" cy="15.5" r="1.5"/><circle cx="12" cy="12" r="1.5"/></svg>
+                        Surprise Me
+                      </button>
+                      <button type="button" class="btn btn-ghost btn-xs" id="btn-use-initials" title="Use monogram initials avatar">
+                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg>
+                        Use Initials
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="avatar-filter-pills" id="avatar-filter-pills" role="tablist">
+                    <button type="button" class="avatar-filter-pill active" data-filter="all">All Characters</button>
+                    <button type="button" class="avatar-filter-pill" data-filter="scholars">Scholars &amp; Pros</button>
+                    <button type="button" class="avatar-filter-pill" data-filter="tech">Tech &amp; STEM</button>
+                    <button type="button" class="avatar-filter-pill" data-filter="animals">Animals &amp; Pals</button>
+                    <button type="button" class="avatar-filter-pill" data-filter="creatives">Creatives &amp; Vibe</button>
+                  </div>
+
+                  <div class="avatar-characters-grid" id="avatar-characters-grid">
+                    <!-- Rendered dynamically by avatar-characters.js -->
+                  </div>
+
+                  <div class="avatar-selected-banner" id="avatar-selected-banner">
+                    <div class="avatar-selected-left">
+                      <span class="avatar-selected-tag">Selected:</span>
+                      <strong id="avatar-selected-name">Alex · The Scholar</strong>
+                      <span class="avatar-selected-desc" id="avatar-selected-desc">Disciplined academic aiming for straight As.</span>
+                    </div>
+                    <div class="avatar-selected-right">
+                      <button type="button" class="btn btn-primary btn-xs" id="btn-apply-avatar-now">
+                        <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                        Save This Avatar
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -293,13 +343,14 @@
     </div>
   </div>
 
-  <script src="js/class-presets.js"></script>
-  <script src="js/auth.js"></script>
-  <script src="js/storage.js"></script>
-  <script src="js/utils.js"></script>
-  <script src="js/theme.js"></script>
-  <script src="js/ai-assistant.js"></script>
-  <script src="js/app.js"></script>
-  <script src="js/profile.js"></script>
+  <script src="js/class-presets.js?v=4"></script>
+  <script src="js/auth.js?v=4"></script>
+  <script src="js/storage.js?v=4"></script>
+  <script src="js/utils.js?v=4"></script>
+  <script src="js/theme.js?v=4"></script>
+  <script src="js/ai-assistant.js?v=4"></script>
+  <script src="js/avatar-characters.js?v=4"></script>
+  <script src="js/app.js?v=4"></script>
+  <script src="js/profile.js?v=4"></script>
 </body>
 </html>
