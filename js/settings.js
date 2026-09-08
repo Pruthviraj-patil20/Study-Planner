@@ -278,6 +278,38 @@
     }
   }
 
+  /* ---------- Google OAuth Configuration ---------- */
+
+  function loadGoogleConfig() {
+    const input = document.getElementById('google-client-id');
+    if (!input || !StudyFlow.Auth || !StudyFlow.Auth.getGoogleClientId) return;
+    input.value = StudyFlow.Auth.getGoogleClientId();
+  }
+
+  function bindGoogleConfig() {
+    const saveBtn = document.getElementById('btn-save-google-config');
+    const resetBtn = document.getElementById('btn-reset-google-config');
+    const input = document.getElementById('google-client-id');
+
+    if (saveBtn) {
+      saveBtn.addEventListener('click', () => {
+        if (!input || !StudyFlow.Auth || !StudyFlow.Auth.setGoogleClientId) return;
+        const val = input.value.trim();
+        StudyFlow.Auth.setGoogleClientId(val);
+        StudyFlow.UI.showToast('Google OAuth Client ID saved successfully.', 'success');
+      });
+    }
+
+    if (resetBtn) {
+      resetBtn.addEventListener('click', () => {
+        if (!input || !StudyFlow.Auth || !StudyFlow.Auth.setGoogleClientId) return;
+        StudyFlow.Auth.setGoogleClientId('');
+        input.value = StudyFlow.Auth.getGoogleClientId();
+        StudyFlow.UI.showToast('Google OAuth Client ID reset to default.', 'info');
+      });
+    }
+  }
+
   /* ---------- Danger Zone / Reset All Data ---------- */
 
   function bindDangerZone() {
@@ -297,6 +329,7 @@
         loadPreferences();
         loadClassInfo();
         loadAISettings();
+        loadGoogleConfig();
         syncThemeButtons();
         StudyFlow.UI.showToast('All data has been reset to default. Reloading...', 'info');
         setTimeout(() => window.location.reload(), 1500);
@@ -315,6 +348,8 @@
     bindAISettings();
     loadClassInfo();
     bindClassSection();
+    loadGoogleConfig();
+    bindGoogleConfig();
     bindDangerZone();
   }
 

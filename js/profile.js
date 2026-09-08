@@ -40,6 +40,31 @@
     verified.classList.toggle('show', !!user.emailVerified);
     document.getElementById('head-status').className = 'badge ' + (user.emailVerified ? 'badge-success' : 'badge-warning');
     document.getElementById('head-status').textContent = user.emailVerified ? 'Verified email' : 'Email not verified';
+
+    var googleBadge = document.getElementById('head-google-badge');
+    if (googleBadge) {
+      var isGoogle = A.isGoogleUser && A.isGoogleUser(user);
+      googleBadge.classList.toggle('hidden', !isGoogle);
+    }
+    refreshPasswordSection(user);
+  }
+
+  function refreshPasswordSection(user) {
+    var note = document.getElementById('pw-google-note');
+    var currentWrap = document.getElementById('pw-current-wrap');
+    var currentInput = document.getElementById('pw-current');
+    var isGoogle = A.isGoogleUser && A.isGoogleUser(user);
+
+    if (note) note.classList.toggle('hidden', !isGoogle);
+    if (currentWrap && currentInput) {
+      if (isGoogle && !user.passwordHash) {
+        currentWrap.classList.add('hidden');
+        currentInput.required = false;
+      } else {
+        currentWrap.classList.remove('hidden');
+        currentInput.required = true;
+      }
+    }
   }
 
   function refreshVerificationControls(user) {
@@ -412,7 +437,9 @@
       var next = document.getElementById('pw-new').value;
       var confirm = document.getElementById('pw-confirm').value;
 
-      if (!current) return showError('password-error', 'Please enter your current password.');
+      var user = A.currentUser() || {};
+      var needsCurrent = !!user.passwordHash;
+      if (needsCurrent && !current) return showError('password-error', 'Please enter your current password.');
       if (next !== confirm) return showError('password-error', 'New passwords do not match.');
       var policy = A.passwordPolicyError(next);
       if (policy) return showError('password-error', policy);
@@ -422,6 +449,7 @@
         var res = await A.changePassword(current, next);
         if (!res.ok) return showError('password-error', res.error);
         form.reset();
+        refreshPasswordSection(A.currentUser());
         StudyFlow.UI.showToast('Password updated successfully.', 'success');
       } catch (err) {
         showError('password-error', 'Something went wrong. Please try again.');

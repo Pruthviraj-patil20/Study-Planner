@@ -89,11 +89,187 @@
     }
 
     bindTabs();
+    bindGoogleAuth();
     bindLogin();
     bindSignup();
     bindVerify();
     bindForgot();
     bindReset();
+  }
+
+  function notify(msg, type) {
+    if (window.StudyFlow && window.StudyFlow.UI && window.StudyFlow.UI.showToast) {
+      window.StudyFlow.UI.showToast(msg, type);
+      return;
+    }
+    var toast = document.createElement('div');
+    toast.className = 'auth-toast ' + (type || 'info');
+    toast.textContent = msg;
+    document.body.appendChild(toast);
+    setTimeout(function () { toast.classList.add('show'); }, 10);
+    setTimeout(function () {
+      toast.classList.remove('show');
+      setTimeout(function () { toast.remove(); }, 300);
+    }, 3200);
+  }
+
+  /* ---------- Google OAuth Sign-in & Sign-up ---------- */
+
+  function bindGoogleAuth() {
+    var clientId = A.getGoogleClientId ? A.getGoogleClientId() : '';
+    var btnLogin = document.getElementById('btn-google-login');
+    var btnSignup = document.getElementById('btn-google-signup');
+    var loginWrap = document.getElementById('gsi-login-btn');
+    var signupWrap = document.getElementById('gsi-signup-btn');
+
+    async function handleGoogleSuccess(payload) {
+      setLoading('btn-google-login', true);
+      setLoading('btn-google-signup', true);
+      showError('login-error', '');
+      showError('signup-error', '');
+
+      try {
+        var res = await A.loginWithGoogle(payload);
+        if (!res.ok) {
+          showError('login-error', res.error || 'Google sign-in failed.');
+          showError('signup-error', res.error || 'Google sign-in failed.');
+          return;
+        }
+        notify('Signed in with Google as ' + (res.user.name || res.user.email) + '!', 'success');
+        redirectAfterAuth();
+      } catch (err) {
+        showError('login-error', 'An error occurred during Google sign-in.');
+        showError('signup-error', 'An error occurred during Google sign-in.');
+      } finally {
+        setLoading('btn-google-login', false);
+        setLoading('btn-google-signup', false);
+      }
+    }
+
+    function onCredentialResponse(response) {
+      if (!response || !response.credential) {
+        showError('login-error', 'No credential received from Google.');
+        return;
+      }
+      var payload = A.parseGoogleJwt(response.credential);
+      if (!payload || !payload.email) {
+        showError('login-error', 'Unable to parse Google authentication token.');
+        return;
+      }
+      handleGoogleSuccess(payload);
+    }
+
+    var isFileProtocol = window.location.protocol === 'file:';
+
+    function promptGoogleAction() {
+      if (isFileProtocol) {
+        var proceed = confirm(
+          'Google Sign-In Notice:\n\n' +
+          'Google OAuth 2.0 requires an HTTP origin (e.g. http://localhost:3000, http://127.0.0.1:5500, or your deployed URL) due to browser security restrictions on the file:// protocol.\n\n' +
+          'Would you like to simulate Google Sign-in with a verified student Google account?'
+        );
+        if (proceed) {
+          handleGoogleSuccess({
+            sub: 'google_' + Math.floor(Math.random() * 1000000),
+            name: 'Alex Johnson',
+            given_name: 'Alex',
+            email: 'alex.johnson.student@gmail.com',
+            picture: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80',
+            email_verified: true
+          });
+        }
+        return;
+      }
+
+      if (window.google && window.google.accounts && window.google.accounts.id) {
+        try {
+          window.google.accounts.id.prompt(function (notification) {
+            if (notification.isNotDisplayed()) {
+              var reason = notification.getNotDisplayedReason ? notification.getNotDisplayedReason() : '';
+              if (reason === 'opt_out_or_no_session') {
+                showError('login-error', 'Please make sure you are signed into Google in your browser.');
+              } else if (reason === 'suppressed_by_user') {
+                showError('login-error', 'Google prompt was dismissed. Please click again.');
+              }
+            }
+          });
+        } catch (e) {
+          console.warn('Google prompt exception:', e);
+        }
+      } else {
+        showError('login-error', 'Google Identity Services is loading. Please try again in a moment.');
+      }
+    }
+
+    if (btnLogin) btnLogin.addEventListener('click', promptGoogleAction);
+    if (btnSignup) btnSignup.addEventListener('click', promptGoogleAction);
+
+    if (isFileProtocol || !clientId) return;
+
+    function renderGsiButtons() {
+      if (!window.google || !window.google.accounts || !window.google.accounts.id) return false;
+
+      try {
+        window.google.accounts.id.initialize({
+          client_id: clientId,
+          callback: onCredentialResponse,
+          auto_select: false,
+          cancel_on_tap_outside: true
+        });
+
+        var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        var gsiTheme = isDark ? 'filled_black' : 'outline';
+
+        if (loginWrap) {
+          window.google.accounts.id.renderButton(loginWrap, {
+            type: 'standard',
+            theme: gsiTheme,
+            size: 'large',
+            text: 'continue_with',
+            shape: 'rectangular',
+            width: 380,
+            logo_alignment: 'left'
+          });
+          setTimeout(function () {
+            if (loginWrap.children.length > 0 && btnLogin) {
+              btnLogin.style.display = 'none';
+            }
+          }, 350);
+        }
+
+        if (signupWrap) {
+          window.google.accounts.id.renderButton(signupWrap, {
+            type: 'standard',
+            theme: gsiTheme,
+            size: 'large',
+            text: 'signup_with',
+            shape: 'rectangular',
+            width: 380,
+            logo_alignment: 'left'
+          });
+          setTimeout(function () {
+            if (signupWrap.children.length > 0 && btnSignup) {
+              btnSignup.style.display = 'none';
+            }
+          }, 350);
+        }
+
+        return true;
+      } catch (err) {
+        console.warn('GSI render error:', err);
+        return false;
+      }
+    }
+
+    if (!renderGsiButtons()) {
+      var tries = 0;
+      var timer = setInterval(function () {
+        tries++;
+        if (renderGsiButtons() || tries > 20) {
+          clearInterval(timer);
+        }
+      }, 150);
+    }
   }
 
   function bindTabs() {

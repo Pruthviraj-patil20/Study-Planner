@@ -171,6 +171,35 @@ body[data-page='auth'] {
   margin: 0 0 14px;
 }
 
+.auth-toast {
+  position: fixed;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-20px);
+  background: var(--bg-card-solid);
+  color: var(--text-primary);
+  border: 1px solid var(--border-strong);
+  box-shadow: var(--shadow-lg);
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-size: 13.5px;
+  font-weight: 600;
+  z-index: 9999;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.auth-toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.auth-toast.success {
+  border-color: rgba(16, 185, 129, 0.35);
+  background: var(--bg-card-solid);
+}
+
 /* ---------- Demo code notice ---------- */
 
 .auth-demo-code {
@@ -211,6 +240,84 @@ body[data-page='auth'] {
 /* ---------- Buttons on auth ---------- */
 
 .btn-block { justify-content: center; padding: 11px 15px; font-size: 14px; }
+
+/* ---------- Google Social Auth ---------- */
+
+.google-auth-box {
+  margin-bottom: 14px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.gsi-button-wrap {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  min-height: 42px;
+}
+
+.gsi-button-wrap:empty {
+  display: none;
+}
+
+.btn-social-google {
+  background: var(--bg-card-solid);
+  color: var(--text-primary);
+  border: 1px solid var(--border-strong);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-weight: 600;
+  font-size: 13.5px;
+  cursor: pointer;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  border-radius: 11px;
+}
+
+.btn-social-google:hover {
+  background: var(--bg-hover);
+  border-color: var(--primary-border);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
+}
+
+.btn-social-google:active {
+  transform: translateY(0);
+}
+
+.google-icon {
+  flex-shrink: 0;
+  display: block;
+}
+
+/* ---------- Auth Divider ---------- */
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  margin: 14px 0 18px;
+  color: var(--text-muted);
+  font-size: 11.5px;
+  width: 100%;
+}
+
+.auth-divider-line {
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.auth-divider-text {
+  padding: 0 12px;
+  font-weight: 550;
+  text-transform: lowercase;
+  letter-spacing: 0.02em;
+}
 
 .auth-legal {
   font-size: 11.5px;

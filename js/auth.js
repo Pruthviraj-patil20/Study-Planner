@@ -35,6 +35,47 @@ window.StudyFlow = window.StudyFlow || {};
   var PENDING_RESET_KEY = 'studyflow_pending_reset';
 
   /* ------------------------------------------------------------------
+     Google OAuth Configuration
+     ------------------------------------------------------------------ */
+  var DEFAULT_GOOGLE_CLIENT_ID = '226876883593-jvbau12qbgpo8rk3nf9a7e6csq38fha1.apps.googleusercontent.com';
+  var GOOGLE_CLIENT_ID_KEY = 'studyflow_google_client_id';
+
+  function getGoogleClientId() {
+    var stored = lsGet(GOOGLE_CLIENT_ID_KEY);
+    return stored && stored.trim() ? stored.trim() : DEFAULT_GOOGLE_CLIENT_ID;
+  }
+
+  function setGoogleClientId(id) {
+    if (!id || !id.trim() || id.trim() === DEFAULT_GOOGLE_CLIENT_ID) {
+      lsRemove(GOOGLE_CLIENT_ID_KEY);
+    } else {
+      lsSet(GOOGLE_CLIENT_ID_KEY, id.trim());
+    }
+  }
+
+  function parseGoogleJwt(token) {
+    if (!token || typeof token !== 'string') return null;
+    try {
+      var parts = token.split('.');
+      if (parts.length < 2) return null;
+      var base64Url = parts[1];
+      var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      var padded = base64.padEnd(base64.length + (4 - base64.length % 4) % 4, '=');
+      var jsonPayload = decodeURIComponent(atob(padded).split('').map(function (c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+      return JSON.parse(jsonPayload);
+    } catch (err) {
+      try {
+        var rawB64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+        return JSON.parse(atob(rawB64));
+      } catch (e2) {
+        return null;
+      }
+    }
+  }
+
+  /* ------------------------------------------------------------------
      Minimal storage primitives (auth is independent of the data layer)
      ------------------------------------------------------------------ */
 
@@ -637,6 +678,85 @@ window.StudyFlow = window.StudyFlow || {};
   }
 
   /* ------------------------------------------------------------------
+     Google OAuth Sign-in & Registration
+     ------------------------------------------------------------------ */
+
+  async function loginWithGoogle(payload) {
+    if (!payload || !payload.email) {
+      return { ok: false, error: 'Invalid Google account details received.' };
+    }
+
+    var email = normalizeEmail(payload.email);
+    var googleId = payload.sub || payload.id || '';
+    var name = String(payload.name || payload.given_name || email.split('@')[0]).trim();
+    var avatar = payload.picture || null;
+
+    var list = loadUsers();
+    var user = list.find(function (u) {
+      return (googleId && u.googleId === googleId) || normalizeEmail(u.email) === email;
+    });
+
+    var isNew = false;
+    var now = new Date().toISOString();
+
+    if (user) {
+      // Existing user: Link Google ID and update profile fields if needed
+      user.googleId = googleId || user.googleId || '';
+      user.authProvider = user.authProvider || 'google';
+      if (!user.emailVerified) user.emailVerified = true;
+      if (avatar && (!user.avatar || user.authProvider === 'google' || (typeof user.avatar === 'string' && user.avatar.indexOf('googleusercontent.com') !== -1))) {
+        user.avatar = avatar;
+      }
+      if (!user.name || user.name === 'Alex Johnson' || user.name === 'Student') {
+        user.name = name;
+      }
+      user.updatedAt = now;
+
+      var idx = list.findIndex(function (u) { return u.id === user.id; });
+      if (idx !== -1) list[idx] = user;
+      saveUsers(list);
+    } else {
+      // New user registration via Google
+      isNew = true;
+      user = {
+        id: 'u_' + randomHex(8),
+        name: name || 'Student',
+        email: email,
+        passwordHash: null,
+        avatar: avatar,
+        bio: '',
+        institution: '',
+        course: '',
+        phone: '',
+        selectedClass: '',
+        classSelected: false,
+        emailVerified: true,
+        googleId: googleId,
+        authProvider: 'google',
+        createdAt: now,
+        updatedAt: now,
+        sessions: []
+      };
+
+      list.push(user);
+      saveUsers(list);
+
+      // Provision user storage namespace
+      if (StudyFlow.Storage && StudyFlow.Storage.seedForUser) {
+        StudyFlow.Storage.seedForUser(user.id, { importLegacy: false });
+      }
+    }
+
+    createSession(user, true);
+    return { ok: true, user: currentUser, isNew: isNew };
+  }
+
+  function isGoogleUser(user) {
+    if (!user) user = currentUser;
+    return !!(user && (user.authProvider === 'google' || user.googleId));
+  }
+
+  /* ------------------------------------------------------------------
      Profile updates
      ------------------------------------------------------------------ */
 
@@ -708,8 +828,14 @@ window.StudyFlow = window.StudyFlow || {};
   async function changePassword(currentPassword, newPassword) {
     var user = findUserById(currentUserId());
     if (!user) return { ok: false, error: 'Not authenticated.' };
-    var valid = await verifyPassword(String(currentPassword || ''), user.passwordHash);
-    if (!valid) return { ok: false, error: 'Current password is incorrect.' };
+
+    // If user registered with Google OAuth and has no password set yet,
+    // current password check is skipped so they can set a password.
+    if (user.passwordHash) {
+      var valid = await verifyPassword(String(currentPassword || ''), user.passwordHash);
+      if (!valid) return { ok: false, error: 'Current password is incorrect.' };
+    }
+
     var policy = passwordPolicyError(newPassword);
     if (policy) return { ok: false, error: policy };
 
@@ -875,6 +1001,11 @@ window.StudyFlow = window.StudyFlow || {};
     revokeAllSessions: revokeAllSessions,
     signup: signup,
     login: login,
+    loginWithGoogle: loginWithGoogle,
+    isGoogleUser: isGoogleUser,
+    getGoogleClientId: getGoogleClientId,
+    setGoogleClientId: setGoogleClientId,
+    parseGoogleJwt: parseGoogleJwt,
     loginDemoUser: loginDemoUser,
     loginAsGuest: loginAsGuest,
     verifyEmail: verifyEmail,
