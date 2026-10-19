@@ -1,5 +1,5 @@
 # 📚 StudyFlow
-
+vfjhdbnmcb,mgvj 
 > Your ultimate, privacy-first study operating system built for modern students and lifelong learners.
 
 StudyFlow is a comprehensive Study Planner and Dashboard tailored for students and developers. It is built entirely using HTML, CSS, and Vanilla JavaScript, requiring zero dependencies, build steps, or backend servers to run. All data is persisted locally in your browser using `localStorage`.
